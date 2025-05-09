@@ -32,4 +32,9 @@ class Button {
     getX() { return this.#x; }
     getY() { return this.#y; }
     getFn() { return this.#fn; }
+
+    setLabel(label) { this.#label = label; }
+    setX(x) { this.#x = x; }
+    setY(y) { this.#y = y; }
+    setFn(fn) { this.#fn = fn; }
 }
