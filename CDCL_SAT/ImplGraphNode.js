@@ -1,7 +1,7 @@
 export class ImplGraphNode {
     #lit;       // {type : Integer} Decision/Implication literal
     #declev;    // {type : Integer} Decision Level
-    #cause;     // {type : (Option Integer} Clause in Knowledge Base that Caused the Implication (false for decisions)
+    #cause;     // {type : Integer} Clause in Knowledge Base that Caused the Implication (null for decisions)
     #depth;     // {type : Integer} # of Edges from a Decision to the Current Node 
     #col;       // {type : Color} Color of the Node
     #tcol;      // {type : Color} Text Color of the Node
