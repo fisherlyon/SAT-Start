@@ -1,4 +1,4 @@
-class Button {
+export class Button {
     #label; // button label
     #x; // x position
     #y; // y position
@@ -16,8 +16,14 @@ class Button {
     show() {
         if (!this.#temp) {
             this.#temp = createButton(this.#label);
-            this.#temp.position(this.#x, this.#y);
             this.#temp.mousePressed(this.#fn);
+
+            // Defer positioning until width/height are available
+            setTimeout(() => {
+                const bx = this.#x - this.#temp.width / 2;
+                const by = this.#y - this.#temp.height / 2;
+                this.#temp.position(bx, by);
+            }, 0);
         }
     }
 
@@ -32,6 +38,8 @@ class Button {
     getX() { return this.#x; }
     getY() { return this.#y; }
     getFn() { return this.#fn; }
+    getWidth() { return this.#temp?.width ?? 0; }
+    getHeight() { return this.#temp?.height ?? 0; }
 
     setLabel(label) { this.#label = label; }
     setX(x) { this.#x = x; }

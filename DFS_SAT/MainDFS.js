@@ -3,24 +3,27 @@ import { TreeNode } from './TreeNode.js';
 import { dfs, keyPressed } from './DFS.js';
 import { displayDFS } from './DisplayDFS.js';
 import { setScreen, getScreen } from './ScreenManager.js';
+import { Button } from './Button.js';
+import { ButtonManager } from './ButtonManager.js';
 
 let btn1, btn2, btn3;
 export let width = 400;
 export let height = 400;
-let example = 0;
+let example = 0; // chosen example problem (1=small, 2=medium, 3=large)
+let exampleButtons;
 
 function setup() {
   createCanvas(400, 400);
+  initExampleButtons();
 }
 
 function draw() {
   background(220);
 
   if (getScreen() === 0) {
-    loop();
-    showButtons();
+    exampleButtons.showAll();
   } else {
-    removeButtons();
+    exampleButtons.remAll();
   }
 
   if (getScreen() === 1 && example !== 0) {
@@ -82,6 +85,41 @@ export function numToVar(num, vars) {
 
 export function varToNum(v, vars) {
   return vars.indexOf(v) + 1;
+}
+
+function initExampleButtons() {
+  exampleButtons = new ButtonManager();
+  let small_btn = new Button(
+    '- Small -',
+    width / 4,
+    height / 2,
+    () => {
+      exampleButtons.remAll();
+      setScreen(1);
+      example = 1;
+    }
+  )
+  let medium_btn = new Button(
+    '- Medium -',
+    width / 2,
+    height / 2,
+    () => {
+      exampleButtons.remAll();
+      setScreen(1);
+      example = 2;
+    }
+  )
+  let large_btn = new Button(
+    '- Large -',
+    3 * width / 4, 
+    height / 2,
+    () => {
+      exampleButtons.remAll();
+      setScreen(1);
+      example = 3;
+    }
+  )
+  exampleButtons.addButtons([small_btn, medium_btn, large_btn]);
 }
 
 function showButtons() {
