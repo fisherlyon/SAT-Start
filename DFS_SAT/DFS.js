@@ -20,9 +20,6 @@ let distance;
 let state_history = []; // history of states for "undo" functionality
 let node_map = new Map();
 let next_node_id = 1;
-let btn;
-let unbtn;
-let buttonsCreated = false;
 
 /**
  * Performs a depth-first search (DFS) on a boolean variable tree.
@@ -78,7 +75,7 @@ export function keyPressed() {
  * Runs the DFS algorithm.
  * @returns {void}
  */
-function run() {
+export function run() {
     if (sat == -1) {
         if (fun === 0) {
             processingUpdate();
@@ -156,7 +153,7 @@ function stepUpdate() {
 }
 
 
-function undo() {
+export function undo() {
     if (state_history.length === 0) return;
     const prevState = state_history.shift();
     cur_decision = prevState.decision;
@@ -280,26 +277,4 @@ function restoreNodeColors(color_map) {
             node.setRecol(colors.recol);
         }
     });
-}
-
-export function showButtonsDFS() {
-    if (!buttonsCreated) {
-        btn = createButton("- Next -");
-        unbtn = createButton('- Undo -');
-        btn.position(4*width/7, height * 0.9);
-        unbtn.position(4*width/7 + btn.width + 5, height * 0.9);
-        btn.mousePressed(run);
-        unbtn.mousePressed(undo);
-        buttonsCreated = true;
-    }
-}
-
-export function removeButtonsDFS() {
-    if (buttonsCreated) {
-        btn.remove();
-        unbtn.remove();
-        btn = null;
-        unbtn = null;
-        buttonsCreated = false;
-    }
 }

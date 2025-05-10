@@ -1,15 +1,16 @@
-import { dfs, showButtonsDFS, removeButtonsDFS } from './DFS.js';
+import { dfs, run, undo } from './DFS.js';
 import { legendManager } from './LegendManager.js';
 import { setScreen } from './ScreenManager.js';
+import { Button } from './Button.js'
+import { ButtonManager } from './ButtonManager.js'
 
 let displayLegend = false; // read-only
-const offset = 15;
-let legend_btn;
-let back_btn;
-let buttonsCreated = false;
-let backClicked = false;
+let navButtons;
 
 export function displayDFS(example) {
+    initNavButtons();
+    navButtons.showAll();
+
     if (example === 1) {
         dfs(["A", "B", " "],
             [
@@ -49,9 +50,6 @@ export function displayDFS(example) {
         );
     }
 
-    showButtons();
-    showButtonsDFS();
-
     if (displayLegend) {
         legendManager.draw();
     }
@@ -65,39 +63,39 @@ export function setDisplayLegend(value) {
     displayLegend = value;
 }
 
-function removeButtons() {
-    if (buttonsCreated) {
-        back_btn.remove();
-        legend_btn.remove();
-        back_btn = null;
-        legend_btn = null;
-        buttonsCreated = false;
-    }
-}
-
-function showButtons() {
-    backClicked = false;
-    if (!buttonsCreated) {
-        back_btn = createButton("- Back -");
-        back_btn.position(offset, offset);
-        back_btn.mousePressed(() => {
-            if (buttonsCreated) {
-                backClicked = true;
-                removeButtons();
-                removeButtonsDFS();
+function initNavButtons() {
+    navButtons = new ButtonManager();
+    let back_btn = new Button(
+        '- Back -',
+        width * 0.09,
+        height * 0.05,
+        () => {
+            if (navButtons.getVisible()) {
+                navButtons.remAll();
             }
             setScreen(0);
             redraw();
-        });
-
-        legend_btn = createButton("- Legend -");
-        legend_btn.position(width - legend_btn.width, offset);
-        legend_btn.mousePressed(() => { 
-            legendManager.open();
-        });
-
-        if (!backClicked) {
-            buttonsCreated = true;
         }
-    }
+    );
+    let legend_btn = new Button(
+        '- Legend -',
+        width * 0.89,
+        height * 0.05,
+        () => {
+            legendManager.open();
+        }
+    );
+    let next_btn = new Button(
+        '- Next -',
+        5 * width / 7,
+        height * 0.95,
+        run
+    );
+    let undo_btn = new Button(
+        '- Undo -',
+        width * 0.9,
+        height * 0.95,
+        undo
+    );
+    navButtons.addButtons([back_btn, legend_btn, next_btn, undo_btn]);
 }

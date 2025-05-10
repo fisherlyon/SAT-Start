@@ -16,12 +16,21 @@ export class Button {
     show() {
         if (!this.#temp) {
             this.#temp = createButton(this.#label);
+            this.#temp.style('position', 'absolute');
             this.#temp.mousePressed(this.#fn);
 
             // Defer positioning until width/height are available
             setTimeout(() => {
-                const bx = this.#x - this.#temp.width / 2;
-                const by = this.#y - this.#temp.height / 2;
+                const btn = this.#temp.elt;
+                const styles = window.getComputedStyle(btn);
+                const bw = btn.offsetWidth;
+                const bh = btn.offsetHeight;
+
+                const px = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
+                const py = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
+
+                const bx = (this.#x + px) - bw / 2;
+                const by = this.#y - py;
                 this.#temp.position(bx, by);
             }, 0);
         }

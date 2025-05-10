@@ -6,11 +6,9 @@ import { setScreen, getScreen } from './ScreenManager.js';
 import { Button } from './Button.js';
 import { ButtonManager } from './ButtonManager.js';
 
-let btn1, btn2, btn3;
-export let width = 400;
-export let height = 400;
 let example = 0; // chosen example problem (1=small, 2=medium, 3=large)
-let exampleButtons;
+let exampleButtons; // example button manager
+let verbose = false; // whether or not verbose formula is displayed
 
 function setup() {
   createCanvas(400, 400);
@@ -21,6 +19,7 @@ function draw() {
   background(220);
 
   if (getScreen() === 0) {
+    loop();
     exampleButtons.showAll();
   } else {
     exampleButtons.remAll();
@@ -52,9 +51,16 @@ function displayDecision(curDecision, vars) {
 }
 
 function displayFormula(formula, vars) {
-  let formulaText = formula.map(clause => `(${clause.map(lit => numToVar(lit, vars)).join(' v ')})`).join(' ∧\n');
-  if (formulaText === "()") formulaText = "() => Contradiction!";
-  else if (formulaText === "") formulaText = "Satisfied!"
+  let formulaText = `{${formula.map(clause => `{${clause.map(lit => numToVar(lit, vars)).join(' v ')}}`).join(' ∧\n')}}`;
+  if ((formulaText === "{{}}" || formulaText == "{}") && !verbose) {
+    verbose = true;
+  } else if (verbose && formulaText === "{{}}") {
+    formulaText += " => Contradiction!";
+    verbose = false;
+  } else if (verbose && formulaText === "{}") {
+    formulaText += " => Satisfied!"
+    verbose = false;
+  }
   text("Formula:\n" + formulaText, width / 20, 3*height / 5);
 }
 
@@ -98,7 +104,7 @@ function initExampleButtons() {
       setScreen(1);
       example = 1;
     }
-  )
+  );
   let medium_btn = new Button(
     '- Medium -',
     width / 2,
@@ -108,7 +114,7 @@ function initExampleButtons() {
       setScreen(1);
       example = 2;
     }
-  )
+  );
   let large_btn = new Button(
     '- Large -',
     3 * width / 4, 
@@ -118,52 +124,8 @@ function initExampleButtons() {
       setScreen(1);
       example = 3;
     }
-  )
+  );
   exampleButtons.addButtons([small_btn, medium_btn, large_btn]);
-}
-
-function showButtons() {
-  if (!btn1 || !btn2 || !btn3) {
-    btn1 = createButton('- Small -');
-    btn2 = createButton('- Medium -');
-    btn3 = createButton('- Large -');
-
-    btn1.position(width / 4 - btn1.width / 2, height / 2 - btn1.height / 2);
-    btn2.position(width / 2 - btn2.width / 2, height / 2 - btn2.height / 2);
-    btn3.position((3 * width) / 4 - btn3.width / 2, height / 2 - btn3.height / 2);
-
-    // button 1 activates the small example
-    btn1.mousePressed(() => {
-      removeButtons();
-      setScreen(1);
-      example = 1;
-    });
-
-    // button 2 activates the medium example
-    btn2.mousePressed(() => {
-      removeButtons();
-      setScreen(1);
-      example = 2;
-    });
-
-    // button 3 activates the large example
-    btn3.mousePressed(() => {
-      removeButtons();
-      setScreen(1);
-      example = 3;
-    });
-  }
-}
-
-function removeButtons() {
-  if (btn1 || btn2 || btn3) {
-    btn1.remove();
-    btn2.remove();
-    btn3.remove();
-    btn1 = null;
-    btn2 = null;
-    btn3 = null;
-  }
 }
 
 window.setup = setup;

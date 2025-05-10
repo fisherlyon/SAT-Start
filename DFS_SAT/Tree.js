@@ -60,6 +60,7 @@ export class Tree {
             let lineEndY = y + dist * sin(angle_left);
             push();
             stroke(node.getLecol());
+            strokeWeight(2);
             line(lineStartX, lineStartY, lineEndX, lineEndY);
             pop();
             this.drawNode(node.getLeft(), vars, lineEndX, lineEndY, dist * 0.7, angle_left - angle_scale, angle_right + angle_scale, radius, angle_scale);
@@ -73,6 +74,7 @@ export class Tree {
             push();
             drawingContext.setLineDash([4, 4]);
             stroke(node.getRecol());
+            strokeWeight(2);
             line(lineStartX, lineStartY, lineEndX, lineEndY);
             pop();
             this.drawNode(node.getRight(), vars, lineEndX, lineEndY, dist * 0.7, angle_left - angle_scale, angle_right + angle_scale, radius, angle_scale);
