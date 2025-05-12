@@ -1,8 +1,8 @@
 import { dfs, run, undo } from './DFS.js';
 import { legendManager } from './LegendManager.js';
 import { setScreen } from './ScreenManager.js';
-import { Button } from './Button.js'
-import { ButtonManager } from './ButtonManager.js'
+import { Button } from '../Utility/Button.js';
+import { ButtonManager } from '../Utility/ButtonManager.js';
 
 let displayLegend = false; // read-only
 let navButtons;
@@ -14,8 +14,8 @@ export function displayDFS(example) {
     if (example === 1) {
         dfs(["A", "B", " "],
             [
-            [-1, 2],
-            [-1, -2]
+                [-1, 2],
+                [-1, -2]
             ],
             15,
             PI/10,
@@ -24,9 +24,9 @@ export function displayDFS(example) {
     } else if (example === 2) {
         dfs(["A", "B", "C", " "],
             [
-            [-1, 2],
-            [-2, 3],
-            [-1, -2]
+                [-1, 2],
+                [-2, 3],
+                [-1, -2]
             ],
             15,
             PI/10,
@@ -35,14 +35,14 @@ export function displayDFS(example) {
     } else if (example === 3) {
         dfs(["A", "B", "C", "D", " "],
             [
-            [-1, -2, 3, 4],
-            [1, 2],
-            [-3, -4],
-            [2, 3],
-            [-1, -4],
-            [-1, -3],
-            [2, -4],
-            [-1, 2, 3, 4]
+                [-1, -2, 3, 4],
+                [1, 2],
+                [-3, -4],
+                [2, 3],
+                [-1, -4],
+                [-1, -3],
+                [2, -4],
+                [-1, 2, 3, 4]
             ],
             7,
             PI/11.27,

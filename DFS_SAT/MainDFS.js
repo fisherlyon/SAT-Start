@@ -3,8 +3,8 @@ import { TreeNode } from './TreeNode.js';
 import { dfs, keyPressed } from './DFS.js';
 import { displayDFS } from './DisplayDFS.js';
 import { setScreen, getScreen } from './ScreenManager.js';
-import { Button } from './Button.js';
-import { ButtonManager } from './ButtonManager.js';
+import { Button } from '../Utility/Button.js';
+import { ButtonManager } from '../Utility/ButtonManager.js';
 
 let example = 0; // chosen example problem (1=small, 2=medium, 3=large)
 let exampleButtons; // example button manager

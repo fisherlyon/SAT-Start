@@ -5,6 +5,8 @@ export class ImplGraphNode {
     #depth;     // {type : Integer} # of Edges from a Decision to the Current Node 
     #col;       // {type : Color} Color of the Node
     #tcol;      // {type : Color} Text Color of the Node
+    #x;
+    #y;
     
     constructor(lit, declev, cause, depth) {
         this.#lit = lit;
@@ -13,6 +15,8 @@ export class ImplGraphNode {
         this.#depth = depth;
         this.#col = 'white';
         this.#tcol = 'black';
+        this.#x = null;
+        this.#y = null;
     }
 
     draw(x, y, vars, r) {
@@ -20,8 +24,8 @@ export class ImplGraphNode {
         fill(this.#col);
         ellipse(x, y, r * 2, r * 2);
         fill(this.#tcol);
-        let node_text = vars[this.#lit - 1];
-        text(this.#lit, x - node_text.length * 4, y + 4);
+        let node_text = this.#lit === 0 ? '{ }' : vars[Math.abs(this.#lit) - 1];
+        text(node_text, x - node_text.length * (node_text === '{ }' ? 2 : 4), y + 4);
         pop();
     }
 
@@ -31,6 +35,8 @@ export class ImplGraphNode {
     getDepth() { return this.#depth; }
     getCol() { return this.#col; }
     getTcol() { return this.#tcol; }
+    getX() { return this.#x; }
+    getY() { return this.#y; }
 
     setLit(lit) { this.#lit = lit; }
     setDeclev(declev) { this.#declev = declev; }
@@ -38,4 +44,8 @@ export class ImplGraphNode {
     setDepth(depth) { this.#depth = depth; }
     setCol(col) { this.#col = col; }
     setTcol(tcol) { this.#tcol = tcol; }
+    setCoords(x, y) { 
+        this.#x = x;
+        this.#y = y;
+    }
 }
