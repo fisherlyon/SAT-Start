@@ -1,10 +1,21 @@
+/**
+ * Implication Graph Node
+ * @property {Number} lit - Decision/Implication literal
+ * @property {Number} declev - Decision Level
+ * @property {Number} clause - Clause in Knowledge Base that Caused the Implication (null for decisions)
+ * @property {Number} depth - # of Edges from a Decision to the Current Node
+ * @property {Color} col - Color of the Node 
+ * @property {Color} tcol - Text Color of the Node
+ * @property {Number} x - Node's x coordinate
+ * @property {Number} y - Node's y coordinate
+ */
 export class ImplGraphNode {
-    #lit;       // {type : Integer} Decision/Implication literal
-    #declev;    // {type : Integer} Decision Level
-    #cause;     // {type : Integer} Clause in Knowledge Base that Caused the Implication (null for decisions)
-    #depth;     // {type : Integer} # of Edges from a Decision to the Current Node 
-    #col;       // {type : Color} Color of the Node
-    #tcol;      // {type : Color} Text Color of the Node
+    #lit;
+    #declev;
+    #cause;
+    #depth;
+    #col;
+    #tcol;
     #x;
     #y;
     
@@ -19,13 +30,13 @@ export class ImplGraphNode {
         this.#y = null;
     }
 
-    draw(x, y, vars, r) {
+    draw(vars, r) {
         push();
         fill(this.#col);
-        ellipse(x, y, r * 2, r * 2);
+        ellipse(this.#x, this.#y, r * 2, r * 2);
         fill(this.#tcol);
         let node_text = this.#lit === 0 ? '{ }' : vars[Math.abs(this.#lit) - 1];
-        text(node_text, x - node_text.length * (node_text === '{ }' ? 2 : 4), y + 4);
+        text(node_text, this.#x - node_text.length * (node_text === '{ }' ? 2 : 4), this.#y + 4);
         pop();
     }
 

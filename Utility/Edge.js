@@ -42,9 +42,11 @@ export class Edge {
     getY1() { return this.#y1; }
     getX2() { return this.#x2; }
     getY2() { return this.#y2; }
+    getColor() { return this.#color; }
 
     setX1(x) { this.#x1 = x; }
     setY1(y) { this.#y1 = y; }
     setX2(x) { this.#x2 = x; }
     setY2(y) { this.#y2 = y; }
+    setColor(col) { this.#color = col; }
 }

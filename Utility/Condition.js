@@ -22,16 +22,16 @@ function conditionHelper(clause, lit) {
 
 
 /**
- * Conditions a knowledge base (kb) on a literal (lit).
- * @param {Array} kb - The knowledge base, an array of clauses.
+ * Conditions a knowledge base (KB) on a literal (lit).
+ * @param {Array} KB - The knowledge base, an array of clauses.
  * @param {number} lit - The literal to condition on.
  * @returns {Array} - The resulting knowledge base after conditioning.
  */
-export function condition(kb, lit) {
-    if (kb.length === 0) return [];
-    if (kb.length === 1 && kb[0].length === 0) return [[]];
+export function condition(KB, lit) {
+    if (KB.length === 0) return [];
+    if (KB.length === 1 && KB[0].length === 0) return [[]];
 
-    const [f, ...r] = kb;
+    const [f, ...r] = KB;
     const result = conditionHelper(f, lit);
 
     if (result === true) {

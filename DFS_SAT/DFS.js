@@ -1,7 +1,8 @@
-import { Tree } from './Tree.js';
-import { TreeNode } from './TreeNode.js';
+import { Tree } from '../Utility/Tree.js';
+import { TreeNode } from '../Utility/TreeNode.js';
+import { Edge } from '../Utility/Edge.js'
 import { render } from './MainDFS.js';
-import { condition } from './Condition.js';
+import { condition } from '../Utility/Condition.js';
 import { getScreen } from './ScreenManager.js';
 
 let tree = new Tree();
@@ -15,8 +16,6 @@ let kb_state_stack = [];
 let sat = -1; // satisfiability state
 let path = []; // current path
 let radius;
-let angle_scale;
-let distance;
 let state_history = []; // history of states for "undo" functionality
 let node_map = new Map();
 let next_node_id = 1;
@@ -34,10 +33,8 @@ export function dfs(boolean_variables, knowledge_base, rad, ascale, d) {
     vars = boolean_variables;
     kb = knowledge_base;
     radius = rad;
-    angle_scale = ascale
-    distance = d;
-    init();
-    render(tree, vars, kb, cur_decision, path, sat, radius, angle_scale, distance);
+    init(d, ascale);
+    render(tree, vars, kb, cur_decision, path, sat, radius);
 }
 
 function dfsStep(tree, dec) {
@@ -54,11 +51,12 @@ function dfsStep(tree, dec) {
 
 /**
  * Initializes the DFS algorithm.
- * Generates the tree, initializes the decision stack, and sets up the button.
+ * Generates the tree, sets the tree node coords, initializes the decision stack, and sets up the button.
  * @returns {void}
  */
-function init() {
+function init(distance, angle_scale) {
     tree.generateTree(vars.length);
+    tree.setNodeCoords(tree.getRoot(), width / 2, height / 10, distance, (5 * PI) / 6, PI / 6, radius, angle_scale);
     cur_node = tree.getRoot(); // get the current node
     dec_stack = [cur_node.getLit(), -cur_node.getLit()];
     initNodeMapping();
@@ -88,7 +86,7 @@ export function run() {
             fun = 0;
         }
     } else {
-        render(tree, vars, kb, cur_decision, path, sat, radius, angle_scale, distance);
+        render(tree, vars, kb, cur_decision, path, sat, radius);
     }
 }
 
@@ -107,7 +105,7 @@ function processingUpdate() {
     }
     path.push(cur_decision);
     updateNodeColors(cur_node, cur_decision, 'blue', 'white', 'blue') // "processing" current node
-    render(tree, vars, kb, cur_decision, path, sat, radius, angle_scale, distance); // render the tree
+    render(tree, vars, kb, cur_decision, path, sat, radius); // render the tree
 }
 
 /**
@@ -118,7 +116,7 @@ function conditionUpdate() {
     saveState(); // save current state for calls to undo
     kb_state_stack.unshift(kb);
     kb = condition(kb, cur_decision);
-    render(tree, vars, kb, cur_decision, path, sat, radius, angle_scale, distance);
+    render(tree, vars, kb, cur_decision, path, sat, radius);
 }
 
 /**
@@ -133,22 +131,22 @@ function stepUpdate() {
     if (kb.length === 0) { // if SAT
         updateRest(cur_node, cur_decision, 'green', 'white', 'green');
         sat = 1;
-        render(tree, vars, kb, cur_decision, path, sat, radius, angle_scale, distance);
+        render(tree, vars, kb, cur_decision, path, sat, radius);
     } else if (kb.length === 1 && kb[0].length === 0) { // if UNSAT
         updateNodeColors(cur_node, cur_decision, 'red', 'white', 'red');
         path.pop();
-        render(tree, vars, kb, cur_decision, path, sat, radius, angle_scale, distance);
+        render(tree, vars, kb, cur_decision, path, sat, radius);
         kb = kb_state_stack.shift();
         if (dec_stack.length === 0) {
             sat = 0;
-            render(tree, vars, kb, cur_decision, path, sat, radius, angle_scale, distance);
+            render(tree, vars, kb, cur_decision, path, sat, radius);
         }
     } else { // if OKAY
         updateNodeColors(cur_node, cur_decision, 'green', 'white', 'green');
         cur_node = dfsStep(cur_node, cur_decision);
         dec_stack.unshift(-cur_node.getLit());
         dec_stack.unshift(cur_node.getLit());
-        render(tree, vars, kb, cur_decision, path, sat, radius, angle_scale, distance);
+        render(tree, vars, kb, cur_decision, path, sat, radius);
     }
 }
 
@@ -165,7 +163,7 @@ export function undo() {
     fun = prevState.funState;
     sat = prevState.satState;
     restoreNodeColors(prevState.nodeColors);
-    render(tree, vars, kb, cur_decision, path, sat, radius, angle_scale, distance);
+    render(tree, vars, kb, cur_decision, path, sat, radius);
 }
 
 /**
@@ -179,10 +177,10 @@ export function undo() {
 function updateNodeColors(node, dec, col, tcol, ecol) {
     node.setCol(col);
     node.setTcol(tcol);
-    if (dec >= 0 ) node.setLecol(ecol)
-    if (dec <= 0) node.setRecol(ecol);
-    if (dec < 0 && node.getLecol() === 'green') { // edge case if a valid path that doesn't lead to a solution
-        node.setLecol('red');
+    if (dec >= 0 && node.getLeftEdge()) node.getLeftEdge().setColor(ecol);
+    if (dec <= 0 && node.getRightEdge()) node.getRightEdge().setColor(ecol);
+    if (dec < 0 && node.getLeftEdge() && node.getLeftEdge().getColor() === 'green') { // edge case if a valid path that doesn't lead to a solution
+        node.getLeftEdge().setColor('red');
     }
 }
 
@@ -241,8 +239,8 @@ function saveState() {
         node_color_map[id] = {
             col: node.getCol(),
             tcol: node.getTcol(),
-            lecol: node.getLecol(),
-            recol: node.getRecol()
+            lecol: node.getLeftEdge() === null ? null : node.getLeftEdge().getColor(),
+            recol: node.getRightEdge()=== null ? null : node.getRightEdge().getColor()
         };
     });
     
@@ -264,17 +262,21 @@ function saveState() {
 
 function restoreNodeColors(color_map) {
     if (!color_map) return;
-    
+
     Object.keys(color_map).forEach(id_str => {
         const id = parseInt(id_str);
         const node = findNodeById(id);
-        
+    
         if (node) {
             const colors = color_map[id];
             node.setCol(colors.col);
             node.setTcol(colors.tcol);
-            node.setLecol(colors.lecol);
-            node.setRecol(colors.recol);
+            if (node.getLeftEdge() && colors.lecol !== null) {
+                node.getLeftEdge().setColor(colors.lecol);
+            }
+            if (node.getRightEdge() && colors.recol !== null) {
+                node.getRightEdge().setColor(colors.recol);
+            }
         }
     });
 }

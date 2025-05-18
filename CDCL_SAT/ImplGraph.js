@@ -1,10 +1,16 @@
 import { ImplGraphNode } from "./ImplGraphNode.js";
-import { Edge } from "./Edge.js"
+import { Edge } from "../Utility/Edge.js"
 
+/**
+ * Implication Graph
+ * @property {(Map Number ImplGraphNode)} nodes - Vertices (literals -> Nodes)
+ * @property {(Map Number (Arrayof Number))} incoming - Incoming Edges
+ * @property {(Map Number (Arrayof Number))} outgoing - Outgoing Edges
+ */
 export class ImplGraph {
-    #nodes;     // {type : (Map Integer ImplGraphNode} Vertices (literals -> Nodes)
-    #incoming;  // {type : (Map Integer (Listof Integer))} Incoming Edges
-    #outgoing;  // {type : (Map Integer (Listof Integer))} Outgoing Edges
+    #nodes;
+    #incoming;
+    #outgoing;
 
     constructor() {
         this.#nodes = new Map();
@@ -65,7 +71,7 @@ export class ImplGraph {
 
     drawNodes(nodes, vars, r) {
         for (let node of nodes) {
-            node.draw(node.getX(), node.getY(), vars, r);
+            node.draw(vars, r);
         }
     }
 

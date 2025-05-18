@@ -1,5 +1,5 @@
-import { Tree } from './Tree.js';
-import { TreeNode } from './TreeNode.js';
+import { Tree } from '../Utility/Tree.js';
+import { TreeNode } from '../Utility/TreeNode.js';
 import { dfs, keyPressed } from './DFS.js';
 import { displayDFS } from './DisplayDFS.js';
 import { setScreen, getScreen } from './ScreenManager.js';
@@ -31,9 +31,9 @@ function draw() {
   }
 }
 
-export function render(tree, vars, kb, dec, path, sat, rad, ascale, d) {
+export function render(tree, vars, kb, dec, path, sat, rad) {
   background(220);
-  tree.drawTree(vars, width / 2, height / 10, d, (5 * PI) / 6, PI / 6, rad, ascale);
+  tree.drawTree(vars, rad);
   displayDecision(dec, vars); // display the current decision
   displayFormula(kb, vars); // display the formula
   displayPath(path, vars); // display the current path
@@ -87,10 +87,6 @@ export function numToVar(num, vars) {
     return "¬" + vars[-num - 1];
   }
   return vars[num - 1];
-}
-
-export function varToNum(v, vars) {
-  return vars.indexOf(v) + 1;
 }
 
 function initExampleButtons() {
