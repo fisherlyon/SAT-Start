@@ -3,10 +3,14 @@ import { TreeNode } from "../Utility/TreeNode.js";
  
 export function displayDecisionTree(D, vars, dist, rad, ascale) {
     let dt = new Tree();
-    initTree(dt, vars.length, dist, rad, ascale);
+    let nodeVars = D.map((x) => (vars[Math.abs(x) - 1]));
+    nodeVars.push(" "); // empty node
+    initTree(dt, D.length + 1, dist, rad, ascale);
     updateNodes(dt.getRoot(), D);
-    dt.drawTree(vars, rad);
+    dt.drawTree(nodeVars, rad);
 } 
+
+/// ^^^^^ need to display the tree, then update the colors and display the same thing
 
 /**
  * Generates the tree and gets the node coordinates and edges.

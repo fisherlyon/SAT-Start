@@ -119,7 +119,16 @@ export class Tree {
             let lineStartY = y + radius * sin(angle_left);
             let lineEndX = x + dist * cos(angle_left);
             let lineEndY = y + dist * sin(angle_left);
-            node.setLeftEdge(new Edge(lineStartX, lineStartY, lineEndX, lineEndY));
+            
+            if (!node.getLeftEdge()) {
+                node.setLeftEdge(new Edge(lineStartX, lineStartY, lineEndX, lineEndY));
+            } else {
+                const edge = node.getLeftEdge();
+                edge.setX1(lineStartX);
+                edge.setY1(lineStartY);
+                edge.setX2(lineEndX);
+                edge.setY2(lineEndY);
+            }
             this.setNodeCoords(node.getLeft(), lineEndX, lineEndY, dist * 0.7, angle_left - angle_scale, angle_right + angle_scale, radius, angle_scale);
         }
 
@@ -128,7 +137,16 @@ export class Tree {
             let lineStartY = y + radius * sin(angle_right);
             let lineEndX = x + dist * cos(angle_right);
             let lineEndY = y + dist * sin(angle_right);
-            node.setRightEdge(new Edge(lineStartX, lineStartY, lineEndX, lineEndY))
+            
+            if (!node.getRightEdge()) {
+                node.setRightEdge(new Edge(lineStartX, lineStartY, lineEndX, lineEndY));
+            } else {
+                const edge = node.getRightEdge();
+                edge.setX1(lineStartX);
+                edge.setY1(lineStartY);
+                edge.setX2(lineEndX);
+                edge.setY2(lineEndY);
+            }
             this.setNodeCoords(node.getRight(), lineEndX, lineEndY, dist * 0.7, angle_left - angle_scale, angle_right + angle_scale, radius, angle_scale);
         }
     }

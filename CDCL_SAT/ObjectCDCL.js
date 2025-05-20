@@ -1,6 +1,9 @@
 import { condition } from "../Utility/Condition.js"
 import { ImplGraph } from "./ImplGraph.js"
 import { ImplGraphNode } from "./ImplGraphNode.js";
+import { Tree } from "../Utility/Tree.js"
+import { TreeNode } from "../Utility/TreeNode.js";
+import { Edge } from "../Utility/Edge.js";
 
 /**
  * CDCL Object Class
@@ -9,6 +12,9 @@ import { ImplGraphNode } from "./ImplGraphNode.js";
  * @property {(Arrayof Number)} D - Decision Sequence
  * @property {(Arrayof (Arrayof Number))} G - Set of Learned Clauses
  * @property {(Arrayof (Arrayof Number))} I - Set of literals either presnet as unit clauses in KB or derived from unit resolution
+ * @property {Tree} dec_tree - The current decision tree
+ * @property {ImplGraph} impl_graph - The current implication graph
+ * @property {(Arrayof String)} vars - Set of variables in knowledge base
  */
 export class ObjectCDCL {
     #KB;
@@ -16,15 +22,25 @@ export class ObjectCDCL {
     #D;
     #G;
     #I;
+    #dec_tree;
+    #valid_tree;
     #impl_graph;
+    #vars;
+    #contradiction;
+    #sat;
     
-    constructor(KB) {
+    constructor(KB, vars) {
         this.#KB = KB;
         this.#temp_kb = KB;
         this.#D = [];
         this.#G = [];
         this.#I = [];
+        this.#dec_tree = null;
+        this.#valid_tree = false;
         this.#impl_graph = null;
+        this.#vars = vars;
+        this.#contradiction = false;
+        this.#sat = false;
     }
 
     /**
@@ -35,15 +51,16 @@ export class ObjectCDCL {
      * @param {(Arrayof Number)} I - Set of literals either present as unit clauses in KB or derived from unit resuloution
      */
     unitRes(KB = this.#KB, D = this.#D, G = this.#G, I = this.#I) {
-        let combinedKB = KB.concat(numsToClauses(D), G);
-        let unitClause = findUnitClause(combinedKB);
+        let combinedKB = KB.concat(this.numsToClauses(D), G);
+        let unitClause = this.findUnitClause(combinedKB);
 
         if (unitClause.length === 0) {
             this.#I = I.reverse();
             this.#temp_kb = combinedKB;
+            return;
         } else {
             I.push(unitClause[0]);
-            unitRes(condition(combinedKB, unitClause[0]), [], [], I);
+            this.unitRes(condition(combinedKB, unitClause[0]), [], [], I);
         }
     }
 
@@ -78,4 +95,103 @@ export class ObjectCDCL {
         if (this.#temp_kb.length === 0) return 0;
         else return this.#temp_kb[0][0];
     }
+
+    addDecision(dec) {
+        if (!this.#valid_tree || this.#dec_tree === null) {
+            this.#dec_tree = new Tree();
+            this.#dec_tree.generateTree(1);
+            this.#valid_tree = true;
+        }        
+
+        this.#D.push(dec); // add the decision to the set of decisions
+        this.#dec_tree.addNodes(this.#D.length + 1); // add the decision to the decision tree
+    }
+
+    displayDecisionTree(dist, rad, ascale) {
+        if (!this.#valid_tree || this.#dec_tree === null) { // if the tree is invalid, i.e. there isn't one or a new set up decisions is being made
+            this.#dec_tree = new Tree();
+            this.#dec_tree.generateTree(1);
+            this.#valid_tree = true;
+        }
+
+        this.#dec_tree.setNodeCoords(this.#dec_tree.getRoot(), width / 2, height / 10, dist, (5 * PI) / 6, PI / 6, rad, ascale);
+        let node_vars = this.#D.map((x) => (this.#vars[Math.abs(x) - 1]));
+        node_vars.push(" ");
+        this.#dec_tree.drawTree(node_vars, rad);
+    }
+
+    updateDecisionTree() {
+        let color = this.#contradiction ? 'red' : 'green';
+        let tcolor = 'white';
+
+        // inner recursive function
+        const udt = (root, D) => {
+            if (root === null) return;
+        
+            if (D.length > 0) { // make ">=" to color final blank node
+                let [f, ...r] = D;
+                root.setCol(color);
+                root.setTcol(tcolor);
+                console.log(f);
+                console.log(root.getLeftEdge());
+                if (f > 0) {
+                    if (root.getLeftEdge()) root.getLeftEdge().setColor(color);
+                    console.log(root.getLeftEdge());
+                    udt(root.getLeft(), r);
+                } else {
+                    if (root.getRightEdge()) root.getRightEdge().setColor(color);
+                    udt(root.getRight(), r);
+                }
+            }
+
+            if ((this.#contradiction || this.#sat) && D.length === 0) {
+                // let [f, ...r] = D;
+                root.setCol(color);
+                root.setTcol(tcolor);
+                // if (f > 0) {
+                //     if (root.getLeftEdge()) root.getLeftEdge().setColor(color);
+                //     updateNodes(root.getLeft(), r);
+                // } else {
+                //     if (root.getRightEdge()) root.getRightEdge().setColor(color);
+                //     updateNodes(root.getRight(), r);
+                // }
+            }
+        }
+
+        udt(this.#dec_tree.getRoot(), this.#D);
+    }
+
+    displayKB(x, y) {
+        let formulaText = `{${this.#temp_kb.map(clause => `{${clause.map(lit => this.numToVar(lit)).join(' v ')}}`).join(' ∧\n')}}`;
+        text("Formula:\n" + formulaText, x, y);
+    }
+
+    displayD(x, y) {
+        let decisionText;
+        if (this.#D.length === 0) {
+            decisionText = "None";
+        } else {
+            decisionText = this.#D.map(lit => this.numToVar(lit)).join(', ');
+        }
+        text("Current Decision(s): " + decisionText, x, y);
+    }
+
+    numToVar(num) {
+        if (num < 0) {
+          return "¬" + this.#vars[Math.abs(num) - 1];
+        }
+        return this.#vars[num - 1];
+    }
+
+    checkContradiction() {
+        this.#contradiction = this.#temp_kb.length === 1 && this.#temp_kb[0].length === 0;
+    }
+
+    checkSAT() {
+        this.#sat = this.#temp_kb.length === 0;
+    }
+
+    getTempKB() { return this.#temp_kb; }
+    getD() { return this.#D; }
+    getDecTree() { return this.#dec_tree; }
 }
