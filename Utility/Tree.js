@@ -140,6 +140,7 @@ export class Tree {
             
             if (!node.getRightEdge()) {
                 node.setRightEdge(new Edge(lineStartX, lineStartY, lineEndX, lineEndY));
+                node.getRightEdge().setDashed(true);
             } else {
                 const edge = node.getRightEdge();
                 edge.setX1(lineStartX);

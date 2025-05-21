@@ -5,6 +5,7 @@ export class Edge {
     #y2;
     #color;
     #weight;
+    #dashed;
 
     constructor(x1, y1, x2, y2) {
         this.#x1 = x1; 
@@ -13,6 +14,7 @@ export class Edge {
         this.#y2 = y2;
         this.#color = 'black';
         this.#weight = 2;
+        this.#dashed = false;
     }
 
     draw(flip) {
@@ -32,6 +34,9 @@ export class Edge {
                 this.#x2, this.#y2
             );
         } else {
+            if (this.#dashed) {
+                drawingContext.setLineDash([4, 4]);
+            }
             line(this.#x1, this.#y1, this.#x2, this.#y2);
         }
 
@@ -49,4 +54,5 @@ export class Edge {
     setX2(x) { this.#x2 = x; }
     setY2(y) { this.#y2 = y; }
     setColor(col) { this.#color = col; }
+    setDashed(bool) { this.#dashed = bool; }
 }

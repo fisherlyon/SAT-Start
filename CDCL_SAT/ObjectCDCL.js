@@ -25,6 +25,7 @@ export class ObjectCDCL {
     #dec_tree;
     #valid_tree;
     #impl_graph;
+    #valid_ig;
     #vars;
     #contradiction;
     #sat;
@@ -38,6 +39,7 @@ export class ObjectCDCL {
         this.#dec_tree = null;
         this.#valid_tree = false;
         this.#impl_graph = null;
+        this.#valid_ig = false;
         this.#vars = vars;
         this.#contradiction = false;
         this.#sat = false;
@@ -121,22 +123,19 @@ export class ObjectCDCL {
     }
 
     updateDecisionTree() {
-        let color = this.#contradiction ? 'red' : 'green';
+        let color = this.#contradiction ? 'red' : 'blue';
         let tcolor = 'white';
 
         // inner recursive function
         const udt = (root, D) => {
             if (root === null) return;
         
-            if (D.length > 0) { // make ">=" to color final blank node
+            if (D.length > 0) {
                 let [f, ...r] = D;
                 root.setCol(color);
                 root.setTcol(tcolor);
-                console.log(f);
-                console.log(root.getLeftEdge());
                 if (f > 0) {
                     if (root.getLeftEdge()) root.getLeftEdge().setColor(color);
-                    console.log(root.getLeftEdge());
                     udt(root.getLeft(), r);
                 } else {
                     if (root.getRightEdge()) root.getRightEdge().setColor(color);
@@ -145,16 +144,8 @@ export class ObjectCDCL {
             }
 
             if ((this.#contradiction || this.#sat) && D.length === 0) {
-                // let [f, ...r] = D;
                 root.setCol(color);
                 root.setTcol(tcolor);
-                // if (f > 0) {
-                //     if (root.getLeftEdge()) root.getLeftEdge().setColor(color);
-                //     updateNodes(root.getLeft(), r);
-                // } else {
-                //     if (root.getRightEdge()) root.getRightEdge().setColor(color);
-                //     updateNodes(root.getRight(), r);
-                // }
             }
         }
 
@@ -162,8 +153,10 @@ export class ObjectCDCL {
     }
 
     displayKB(x, y) {
-        let formulaText = `{${this.#temp_kb.map(clause => `{${clause.map(lit => this.numToVar(lit)).join(' v ')}}`).join(' ∧\n')}}`;
-        text("Formula:\n" + formulaText, x, y);
+        let formula_text = `{${this.#temp_kb.map(clause => `{${clause.map(lit => this.numToVar(lit)).join(' v ')}}`).join(' ∧\n')}}`;
+        formula_text = formula_text + (this.#contradiction ? " => CONDRADICTION\nLet's build the implication graph..." : "");
+        formula_text = formula_text + (this.#sat ? " => SATISFIED" : "");
+        text("Formula:\n" + formula_text, x, y);
     }
 
     displayD(x, y) {
@@ -191,7 +184,34 @@ export class ObjectCDCL {
         this.#sat = this.#temp_kb.length === 0;
     }
 
+    initImplGraph() {
+        if (!this.#valid_ig || this.#impl_graph === null) {
+            this.#impl_graph = new ImplGraph();
+            this.#valid_ig = true;
+        }
+
+        for (let i = 0; i < this.#D.length; i++) {
+            this.#impl_graph.addDecision(this.#D[i], i);
+        }
+    }
+
+    displayImplGraph(radius) {
+        if (!this.#valid_ig || this.#impl_graph === null) {
+            this.#impl_graph = new ImplGraph();
+            this.#valid_ig = true;
+        }
+
+        this.#impl_graph.drawGraph(this.#vars, radius);
+    }
+
     getTempKB() { return this.#temp_kb; }
     getD() { return this.#D; }
     getDecTree() { return this.#dec_tree; }
+    getContradiction() { return this.#contradiction; }
+    getSAT() { return this.#sat; }
+    getImplGraph() { return this.#impl_graph; }
+
+    setDecTreeValidity(bool) { this.#valid_tree = bool; }
+    setDecTree(tree) { this.#dec_tree = tree; }
+    setImplGraphhValidity(bool) { this.#valid_ig = bool; }
 }

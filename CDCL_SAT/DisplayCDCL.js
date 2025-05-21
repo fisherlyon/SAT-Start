@@ -1,6 +1,6 @@
 import { ButtonManager } from "../Utility/ButtonManager.js";
 import { Button } from "../Utility/Button.js";
-import { runDecisionTree } from "./CDCL.js";
+import { run } from "./CDCL.js";
 import { ObjectCDCL } from "./ObjectCDCL.js";
 
 let navButtons;
@@ -27,7 +27,7 @@ function initNavButtons() {
         width / 2,
         height * 0.9,
         () => {
-            runDecisionTree(cdcl_example);
+            run(cdcl_example);
         }
     );
     navButtons.addButtons([next_btn]);
