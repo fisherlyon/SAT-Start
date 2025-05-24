@@ -207,16 +207,17 @@ export class ObjectCDCL {
 
     findImplClause(lit) {
         const fic = (KB, graph, D, I, impl_lit, kb_index) => {
-            let [f, ...r] = kb;
 
             if (KB.length === 0) {
                 console.log("Error: No implication clause found.\n");
                 return;
             }
 
+            let [f, ...r] = kb;
+
             if (lit === 0) {
                 if (f.every((x) => (I.includes(-x)))) {
-                    let nodes_from = setDiff(f, (f.concat([impl_lit]).map((x) => (-x))));
+                    let nodes_from = (setDiff(f, [impl_lit])).map((x) => (-x));
                     graph.addImplication(
                         impl_lit,
                         Math.max(...(nodes_from.map((key) => ((graph.get(key)).getDeclev())))),
@@ -224,8 +225,10 @@ export class ObjectCDCL {
                         1 + Math.min(...(nodes_from.map((key) => ((graph.get(key)).getDepth())))),
                         nodes_from
                     );
+                    return;
+                } else {
                     fic(r, graph, D, I, impl_lit, 1 + kb_index);
-                } 
+                }
             }
 
             if (f.includes(impl_lit) && f.every((x) => (D.map((y) => (-y)).concat([impl_lit]).includes(x)))) {
@@ -237,6 +240,7 @@ export class ObjectCDCL {
                     1 + Math.min(...(nodes_from.map((key) => ((graph.get(key)).getDepth())))),
                     nodes_from
                 );
+                return;
             }
 
             fic(r, graph, D, I, impl_lit, 1 + kb_index);
