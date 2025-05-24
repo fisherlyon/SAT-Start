@@ -4,6 +4,7 @@ import { ImplGraphNode } from "./ImplGraphNode.js";
 import { Tree } from "../Utility/Tree.js"
 import { TreeNode } from "../Utility/TreeNode.js";
 import { Edge } from "../Utility/Edge.js";
+import { setDiff } from "../Utility/Util.js"
 
 /**
  * CDCL Object Class
@@ -204,8 +205,38 @@ export class ObjectCDCL {
         this.#impl_graph.drawGraph(this.#vars, radius);
     }
 
+    findImplClause(lit) {
+        const fic = (KB, graph, D, I, impl_lit, kb_index) => {
+            let [f, ...r] = kb;
+
+            if (KB.length === 0) {
+                console.log("Error: No implication clause found.\n");
+                return;
+            }
+
+            if (lit === 0) {
+                if (f.every((x) => (I.includes(-x)))) {
+                    let nodes_from = setDiff(KB[0], (f.concat([impl_lit]).map((x) => (-x))));
+                    this.#impl_graph.addImplication(
+                        impl_lit,
+                        
+                    )
+                } 
+            }
+
+            if (f.includes(impl_lit)) {
+                
+            }
+
+            fic(r, graph, D, I, impl_lit, kb_index + 1);
+        }
+
+        fic(this.#KB.concat(this.#G), this.#impl_graph, this.#D, this.#I, lit, 0);
+    }
+
     getTempKB() { return this.#temp_kb; }
     getD() { return this.#D; }
+    getI() { return this.#I; }
     getDecTree() { return this.#dec_tree; }
     getContradiction() { return this.#contradiction; }
     getSAT() { return this.#sat; }

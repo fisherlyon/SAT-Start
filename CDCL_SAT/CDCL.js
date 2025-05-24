@@ -1,7 +1,11 @@
 import { ObjectCDCL } from "./ObjectCDCL.js";
 import { setScreen, getScreen } from "./ScreenManager.js";
+import { setDiff } from "../Utility/Util.js"
 
 let stage = -1;
+let implLits; // array of implications literals
+let unexploredImpls; // count of unexplored implications
+let exploredImpls;
 
 export function run(cdcl_obj) {
     if (getScreen() === 1) {
@@ -52,9 +56,18 @@ function runImplGraph(cdcl_obj) {
     if (stage === -1) {
         reinitScreen();
         stage = 0;
-    } else if (stage === 0) {
+    } else if (stage === 0) { // initially display the decisions and initialize implication literals
         cdcl_obj.initImplGraph();
         cdcl_obj.displayImplGraph(15);
+        implLits = setDiff(cdcl_obj.getI(), cdcl_obj.getD());
+        unexploredImpls = implLits.length;
+        exploredImpls = 0;
+        stage = 1;
+    } else if (stage === 1) { // start finding implications
+        if (exploredImpls < unexploredImpls) {
+            cdcl_obj.findImplClause(implLits[exploredImpls]);
+            exploredImpls += 1;
+        }
     }
 
     text("Decision(s)", 35, 250);
