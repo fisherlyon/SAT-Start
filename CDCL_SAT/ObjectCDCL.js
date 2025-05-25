@@ -271,14 +271,23 @@ export class ObjectCDCL {
                 graph.getNodes().get(f).getDeclev() === graph.getNodes().get(0).getDeclev()
             ) {
                 return f;
+            } else {
+                return hdl(graph, r);
             }
-
-            return hdl(graph, r);
         }
 
-        return hdl(this.#impl_graph, Array.from(this.#impl_graph.keys()));
+        return hdl(this.#impl_graph, Array.from(this.#impl_graph.getNodes().keys()));
     }
 
+    /**
+     * Finds all possible paths from the decsion node made at the highest decision level to the contracdiction.
+     * @param { (Map Number (Arrayof Number)) } outgoing_adj_list - Outgoing adjacency list for each of the nodes n the implication graph
+     * @param { Number } source - The source node
+     * @param { Number } target - The target node 
+     * @param { (Arrayof (Arrayof Number)) } queue - Queue of paths used in BFS
+     * @param { (Arrayof (Arrayof Number)) } result - The resulting array of all paths
+     * @returns { (Arrayof (Arrayof Number)) } The resulting array of all paths
+     */
     findAllPaths() {
         const ap = (outgoing_adj_list, source, target) => {
             const bfs = (queue, result) => {
@@ -291,12 +300,13 @@ export class ObjectCDCL {
                 let neighbors = outgoing_adj_list.get(node) || [];
 
                 if (node === target) {
-                    return bfs(rest_queue, result.concat([path]));
+                    return bfs(rest_queue, [path, ...result]);
+                } else {
+                    let new_paths = neighbors.map((n) => (path.concat([n])));
+                    return bfs(rest_queue.concat(new_paths), result);
                 }
-
-                let new_paths = neighbors.map((n) => (path.concat([n])));
-                return bfs(rest_queue.concat(new_paths), result);
             };
+
             return (bfs([[source]], [])).reverse();
         };
 
@@ -311,18 +321,28 @@ export class ObjectCDCL {
                 }
 
                 let [f, ...r] = first_path;
-                let [_, ...rest] = all_paths;
+                let [, ...rest] = all_paths;
                 
                 if (rest.every((other_path) => (other_path.includes(f)))) {
                     return [f, ...findUIPs(r)];
+                } else {
+                    return findUIPs(r);
                 }
-
-                findUIPs(r);
             };
+
             let uips = findUIPs(all_paths[0]);
             return uips[uips.length - 1];
         };
+
         return getFirst(this.findAllPaths());
+    }
+
+    getAsserting() {
+        const gac = (incoming_adj_list, source, target) => {
+            const bfs = (queue, visited, result) => {
+
+            };
+        };
     }
 
     getTempKB() { return this.#temp_kb; }

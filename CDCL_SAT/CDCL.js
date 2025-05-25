@@ -86,6 +86,13 @@ function runImplGraph(cdcl_obj) {
     } else if (stage === 3) {
         stage_text = "Find First Unique Implication Point";
         cdcl_obj.displayImplGraph(15);
+        stage = 4;
+    } else if (stage === 4) {
+        let uip = cdcl_obj.findFirstUIP();
+        console.log(uip);
+        cdcl_obj.getImplGraph().getNodes().get(uip).setCol('yellow');
+        cdcl_obj.getImplGraph().getNodes().get(uip).setTcol('black');
+        cdcl_obj.displayImplGraph(15);
     }
 
     text("Decision(s)", 35, 250);

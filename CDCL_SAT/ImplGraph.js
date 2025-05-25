@@ -26,8 +26,6 @@ export class ImplGraph {
 
         // set the coordinates of the decision nodes
         for (let i = 0; i < dec_nodes.length; i++) {
-            dec_nodes[i].setCol('green');
-            dec_nodes[i].setTcol('white');
             dec_nodes[i].setCoords(x_separation, y_dec_separation * (i + 1));
         }
 
@@ -60,8 +58,6 @@ export class ImplGraph {
                     let temp_node = this.#nodes.get(temp_incoming[j]);
                     edges.push(new Edge(x_impl_separation, y_impl_separation, temp_node.getX(), temp_node.getY()));
                 }
-                temp[i].setCol(temp[i].getLit() === 0 ? 'red' : 'orange');
-                temp[i].setTcol('white');
                 temp[i].setCoords(x_impl_separation, y_impl_separation);
             }
 
@@ -88,13 +84,19 @@ export class ImplGraph {
     }
 
     addDecision(lit, declev) {
-        this.#nodes.set(lit, new ImplGraphNode(lit, declev, null, 0));
+        let ig_node = new ImplGraphNode(lit, declev, null, 0);
+        ig_node.setCol('green');
+        ig_node.setTcol('white');
+        this.#nodes.set(lit, ig_node);
         this.#incoming.set(lit, []);
         this.#outgoing.set(lit, []);
     }
 
     addImplication(lit, declev, cause, depth, nodes_from) {
-        this.#nodes.set(lit, new ImplGraphNode(lit, declev, cause, depth));
+        let ig_node = new ImplGraphNode(lit, declev, cause, depth);
+        ig_node.setCol(ig_node.getLit() === 0 ? 'red' : 'orange');
+        ig_node.setTcol('white');
+        this.#nodes.set(lit, ig_node);
         this.#incoming.set(lit, nodes_from);
         this.#outgoing.set(lit, []);
 
