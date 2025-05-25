@@ -288,7 +288,7 @@ export class ObjectCDCL {
 
                 let [path, ...rest_queue] = queue;
                 let node = path[path.length - 1];
-                let neighbors = outgoing_adj_list.get(node);
+                let neighbors = outgoing_adj_list.get(node) || [];
 
                 if (node === target) {
                     return bfs(rest_queue, result.concat([path]));
@@ -296,11 +296,33 @@ export class ObjectCDCL {
 
                 let new_paths = neighbors.map((n) => (path.concat([n])));
                 return bfs(rest_queue.concat(new_paths), result);
-            }
+            };
             return (bfs([[source]], [])).reverse();
-        }
+        };
 
         return ap(this.#impl_graph.getOutgoing(), this.getHDLNode(), 0);
+    }
+
+    findFirstUIP() {
+        const getFirst = (all_paths) => {
+            const findUIPs = (first_path) => {
+                if (first_path.length === 1 && first_path[0] === 0) {
+                    return []; // don't include the contradiction, return
+                }
+
+                let [f, ...r] = first_path;
+                let [_, ...rest] = all_paths;
+                
+                if (rest.every((other_path) => (other_path.includes(f)))) {
+                    return [f, ...findUIPs(r)];
+                }
+
+                findUIPs(r);
+            };
+            let uips = findUIPs(all_paths[0]);
+            return uips[uips.length - 1];
+        };
+        return getFirst(this.findAllPaths());
     }
 
     getTempKB() { return this.#temp_kb; }
