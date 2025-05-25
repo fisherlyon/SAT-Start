@@ -63,7 +63,7 @@ export class ObjectCDCL {
             return;
         } else {
             I.push(unitClause[0]);
-            this.unitRes(condition(combinedKB, unitClause[0]), [], [], I);
+            return this.unitRes(condition(combinedKB, unitClause[0]), [], [], I);
         }
     }
 
@@ -137,10 +137,10 @@ export class ObjectCDCL {
                 root.setTcol(tcolor);
                 if (f > 0) {
                     if (root.getLeftEdge()) root.getLeftEdge().setColor(color);
-                    udt(root.getLeft(), r);
+                    return udt(root.getLeft(), r);
                 } else {
                     if (root.getRightEdge()) root.getRightEdge().setColor(color);
-                    udt(root.getRight(), r);
+                    return udt(root.getRight(), r);
                 }
             }
 
@@ -150,7 +150,7 @@ export class ObjectCDCL {
             }
         };
 
-        udt(this.#dec_tree.getRoot(), this.#D);
+        return udt(this.#dec_tree.getRoot(), this.#D);
     }
 
     displayKB(x, y) {
@@ -247,11 +247,12 @@ export class ObjectCDCL {
             return fic(r, graph, D, I, impl_lit, 1 + kb_index);
         };
 
-        fic(this.#KB.concat(this.#G), this.#impl_graph, this.#D.concat(temp_d), this.#I, lit, 0);
+        return fic(this.#KB.concat(this.#G), this.#impl_graph, this.#D.concat(temp_d), this.#I, lit, 0);
     }
 
     /**
      * Gets the decision node made at the highest level in the implication graph.
+     * Used to find the first Unique Implication Point (UIP) (graph dominator)
      * @param { ImplGraph } graph - This CDCL object's current implication graph
      * @param { (Arrayof Numebrs) } keys - The literals of the nodes in the implication graph
      * @returns { Number } Returns the decision node made at the highest level 
@@ -274,6 +275,32 @@ export class ObjectCDCL {
 
             return hdl(graph, r);
         }
+
+        return hdl(this.#impl_graph, Array.from(this.#impl_graph.keys()));
+    }
+
+    findAllPaths() {
+        const ap = (outgoing_adj_list, source, target) => {
+            const bfs = (queue, result) => {
+                if (queue.length === 0) {
+                    return result;
+                }
+
+                let [path, ...rest_queue] = queue;
+                let node = path[path.length - 1];
+                let neighbors = outgoing_adj_list.get(node);
+
+                if (node === target) {
+                    return bfs(rest_queue, result.concat([path]));
+                }
+
+                let new_paths = neighbors.map((n) => (path.concat([n])));
+                return bfs(rest_queue.concat(new_paths), result);
+            }
+            return (bfs([[source]], [])).reverse();
+        }
+
+        return ap(this.#impl_graph.getOutgoing(), this.getHDLNode(), 0);
     }
 
     getTempKB() { return this.#temp_kb; }

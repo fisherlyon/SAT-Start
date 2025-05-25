@@ -84,7 +84,7 @@ function runImplGraph(cdcl_obj) {
         }
         cdcl_obj.displayImplGraph(15);
     } else if (stage === 3) {
-        stage_text = "Find Graph Dominator";
+        stage_text = "Find First Unique Implication Point";
         cdcl_obj.displayImplGraph(15);
     }
 
