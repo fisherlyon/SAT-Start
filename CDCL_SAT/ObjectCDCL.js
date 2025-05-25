@@ -252,7 +252,7 @@ export class ObjectCDCL {
 
     /**
      * Gets the decision node made at the highest level in the implication graph.
-     * Used to find the first Unique Implication Point (UIP) (graph dominator)
+     * Used to find the first Unique Implication Point (UIP) (highest graph dominator)
      * @param { ImplGraph } graph - This CDCL object's current implication graph
      * @param { (Arrayof Numebrs) } keys - The literals of the nodes in the implication graph
      * @returns { Number } Returns the decision node made at the highest level 
@@ -313,6 +313,10 @@ export class ObjectCDCL {
         return ap(this.#impl_graph.getOutgoing(), this.getHDLNode(), 0);
     }
 
+    /**
+     * 
+     * @returns 
+     */
     findFirstUIP() {
         const getFirst = (all_paths) => {
             const findUIPs = (first_path) => {
@@ -337,17 +341,10 @@ export class ObjectCDCL {
         return getFirst(this.findAllPaths());
     }
 
-    getAsserting() {
-        const gac = (incoming_adj_list, source, target) => {
-            const bfs = (queue, visited, result) => {
-
-            };
-        };
-    }
-
     getTempKB() { return this.#temp_kb; }
     getD() { return this.#D; }
     getI() { return this.#I; }
+    getG() { return this.#G; }
     getDecTree() { return this.#dec_tree; }
     getContradiction() { return this.#contradiction; }
     getSAT() { return this.#sat; }
