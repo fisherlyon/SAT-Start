@@ -6,6 +6,8 @@ let stage = -1;
 let implLits; // array of implications literals
 let unexploredImpls; // count of unexplored implications
 let exploredImpls;
+let temp_d = [];
+let stage_text;
 
 export function run(cdcl_obj) {
     if (getScreen() === 1) {
@@ -55,23 +57,40 @@ function runImplGraph(cdcl_obj) {
 
     if (stage === -1) {
         reinitScreen();
+        stage_text = "Display Decisions";
         stage = 0;
     } else if (stage === 0) { // initially display the decisions and initialize implication literals
+        stage_text = "Display Decisions";
         cdcl_obj.initImplGraph();
+        cdcl_obj.displayImplGraph(15);
+        exploredImpls = 0;
+        stage = 1;
+    } else if (stage === 1) { // start finding implications
+        stage_text = "Find & Display Implications";
         cdcl_obj.displayImplGraph(15);
         implLits = setDiff(cdcl_obj.getI(), cdcl_obj.getD());
         unexploredImpls = implLits.length;
         exploredImpls = 0;
-        stage = 1;
-    } else if (stage === 1) { // start finding implications
+        stage = 2;
+    } else if (stage === 2) {
+        stage_text = "Find & Display Implications";
         if (exploredImpls < unexploredImpls) {
-            cdcl_obj.findImplClause(implLits[exploredImpls]);
+            cdcl_obj.findImplClause(implLits[exploredImpls], temp_d);
+            temp_d.push(implLits[exploredImpls]);
             exploredImpls += 1;
+        } else {
+            cdcl_obj.findImplClause(0, []);
+            stage = 3;
         }
+        cdcl_obj.displayImplGraph(15);
+    } else if (stage === 3) {
+        stage_text = "Find Graph Dominator";
+        cdcl_obj.displayImplGraph(15);
     }
 
     text("Decision(s)", 35, 250);
-    text("Implication(s)", 200, 250);
+    text("Implication(s)", 115, 250);
+    text("Stage: " + stage_text, 35, 275);
 }
 
 function reinitScreen() {

@@ -8,14 +8,14 @@ import { setDiff } from "../Utility/Util.js"
 
 /**
  * CDCL Object Class
- * @property {(Arrayof (Arrayof Number))} KB - Knowledge Base
- * @property {(Arrayof (Arrayof Number))} temp_kb - Temporary KB - result of unit resolution
- * @property {(Arrayof Number)} D - Decision Sequence
- * @property {(Arrayof (Arrayof Number))} G - Set of Learned Clauses
- * @property {(Arrayof (Arrayof Number))} I - Set of literals either presnet as unit clauses in KB or derived from unit resolution
- * @property {Tree} dec_tree - The current decision tree
- * @property {ImplGraph} impl_graph - The current implication graph
- * @property {(Arrayof String)} vars - Set of variables in knowledge base
+ * @property { (Arrayof (Arrayof Number)) } KB - Knowledge Base
+ * @property { (Arrayof (Arrayof Number)) } temp_kb - Temporary KB - result of unit resolution
+ * @property { (Arrayof Number) } D - Decision Sequence
+ * @property { (Arrayof (Arrayof Number)) } G - Set of Learned Clauses
+ * @property { (Arrayof (Arrayof Number)) } I - Set of literals either presnet as unit clauses in KB or derived from unit resolution
+ * @property { Tree } dec_tree - The current decision tree
+ * @property { ImplGraph } impl_graph - The current implication graph
+ * @property { (Arrayof String) } vars - Set of variables in knowledge base
  */
 export class ObjectCDCL {
     #KB;
@@ -48,10 +48,10 @@ export class ObjectCDCL {
 
     /**
      * Performs unit resolution on a knowledge base given the following parameters.
-     * @param {(Arrayof (Arrayof Number))} KB - Knowledge Base
-     * @param {(Arrayof (Arrayof Number))} G - Set of Learned Clauses
-     * @param {(Arrayof Number)} D - Decision Sequence
-     * @param {(Arrayof Number)} I - Set of literals either present as unit clauses in KB or derived from unit resuloution
+     * @param { (Arrayof (Arrayof Number)) } KB - Knowledge Base
+     * @param { (Arrayof (Arrayof Number)) } G - Set of Learned Clauses
+     * @param { (Arrayof Number) } D - Decision Sequence
+     * @param { (Arrayof Number) } I - Set of literals either present as unit clauses in KB or derived from unit resuloution
      */
     unitRes(KB = this.#KB, D = this.#D, G = this.#G, I = this.#I) {
         let combinedKB = KB.concat(this.numsToClauses(D), G);
@@ -69,8 +69,8 @@ export class ObjectCDCL {
 
     /**
      * Takes in a set of "decisions" and converts them to a set of unit clauses.
-     * @param {(Arrayof Number)} nums 
-     * @returns {(Arrayof (Arrayof Number))}
+     * @param { (Arrayof Number) } nums 
+     * @returns { (Arrayof (Arrayof Number)) }
      */
     numsToClauses(nums) {
         if (nums.length === 0) return [];
@@ -80,8 +80,8 @@ export class ObjectCDCL {
 
     /**
      * Given a set of clauses (KB), returns a clause of length one (unit clause).
-     * @param {(Arrayof (Arrayof Number))} KB - Knowlege Base
-     * @returns {(Arrayof (Number))} - The found unit clause, if there is one
+     * @param { (Arrayof (Arrayof Number)) } KB - Knowlege Base
+     * @returns { (Arrayof (Number)) } - The found unit clause, if there is one
      */
     findUnitClause(KB) {
         if (KB.length === 0) return [];
@@ -92,7 +92,7 @@ export class ObjectCDCL {
 
     /**
      * Returns the next decision.
-     * @returns {Number} - 0 if KB is empty, otherwise, the first lit of the first clause
+     * @returns { Number } - 0 if KB is empty, otherwise, the first lit of the first clause
      */
     getNextDecision() {
         if (this.#temp_kb.length === 0) return 0;
@@ -148,7 +148,7 @@ export class ObjectCDCL {
                 root.setCol(color);
                 root.setTcol(tcolor);
             }
-        }
+        };
 
         udt(this.#dec_tree.getRoot(), this.#D);
     }
@@ -205,7 +205,7 @@ export class ObjectCDCL {
         this.#impl_graph.drawGraph(this.#vars, radius);
     }
 
-    findImplClause(lit) {
+    findImplClause(lit, temp_d) {
         const fic = (KB, graph, D, I, impl_lit, kb_index) => {
 
             if (KB.length === 0) {
@@ -213,40 +213,67 @@ export class ObjectCDCL {
                 return;
             }
 
-            let [f, ...r] = kb;
+            let [f, ...r] = KB;
 
             if (lit === 0) {
                 if (f.every((x) => (I.includes(-x)))) {
                     let nodes_from = (setDiff(f, [impl_lit])).map((x) => (-x));
                     graph.addImplication(
                         impl_lit,
-                        Math.max(...(nodes_from.map((key) => ((graph.get(key)).getDeclev())))),
+                        Math.max(...(nodes_from.map((key) => ((graph.getNodes().get(key)).getDeclev())))),
                         kb_index,
-                        1 + Math.min(...(nodes_from.map((key) => ((graph.get(key)).getDepth())))),
+                        1 + Math.max(...(nodes_from.map((key) => ((graph.getNodes().get(key)).getDepth())))),
                         nodes_from
                     );
                     return;
-                } else {
-                    fic(r, graph, D, I, impl_lit, 1 + kb_index);
-                }
+                } 
+                return fic(r, graph, D, I, impl_lit, 1 + kb_index);
             }
 
-            if (f.includes(impl_lit) && f.every((x) => (D.map((y) => (-y)).concat([impl_lit]).includes(x)))) {
+            if (
+                f.includes(impl_lit) && 
+                f.every((x) => (D.map((y) => (-y)).concat([impl_lit]).includes(x)))
+            ) {
                 let nodes_from = (setDiff(f, [impl_lit])).map((x) => (-x));
                 graph.addImplication(
                     impl_lit,
-                    Math.max(...(nodes_from.map((key) => ((graph.get(key)).getDeclev())))),
+                    Math.max(...(nodes_from.map((key) => ((graph.getNodes().get(key)).getDeclev())))),
                     kb_index,
-                    1 + Math.min(...(nodes_from.map((key) => ((graph.get(key)).getDepth())))),
+                    1 + Math.max(...(nodes_from.map((key) => ((graph.getNodes().get(key)).getDepth())))),
                     nodes_from
                 );
                 return;
             }
+            return fic(r, graph, D, I, impl_lit, 1 + kb_index);
+        };
 
-            fic(r, graph, D, I, impl_lit, 1 + kb_index);
+        fic(this.#KB.concat(this.#G), this.#impl_graph, this.#D.concat(temp_d), this.#I, lit, 0);
+    }
+
+    /**
+     * Gets the decision node made at the highest level in the implication graph.
+     * @param { ImplGraph } graph - This CDCL object's current implication graph
+     * @param { (Arrayof Numebrs) } keys - The literals of the nodes in the implication graph
+     * @returns { Number } Returns the decision node made at the highest level 
+     */
+    getHDLNode() {
+        const hdl = (graph, keys) => {
+            if (keys.length === 0) {
+                console.log("Error: Couldn't find decision node made at the highest level.");
+                return;
+            }
+
+            let [f, ...r] = keys;
+
+            if (
+                graph.getNodes().get(f).getCause() === null &&
+                graph.getNodes().get(f).getDeclev() === graph.getNodes().get(0).getDeclev()
+            ) {
+                return f;
+            }
+
+            return hdl(graph, r);
         }
-
-        fic(this.#KB.concat(this.#G), this.#impl_graph, this.#D, this.#I, lit, 0);
     }
 
     getTempKB() { return this.#temp_kb; }

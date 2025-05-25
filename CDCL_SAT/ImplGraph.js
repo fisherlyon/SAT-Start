@@ -26,6 +26,8 @@ export class ImplGraph {
 
         // set the coordinates of the decision nodes
         for (let i = 0; i < dec_nodes.length; i++) {
+            dec_nodes[i].setCol('green');
+            dec_nodes[i].setTcol('white');
             dec_nodes[i].setCoords(x_separation, y_dec_separation * (i + 1));
         }
 
@@ -58,6 +60,8 @@ export class ImplGraph {
                     let temp_node = this.#nodes.get(temp_incoming[j]);
                     edges.push(new Edge(x_impl_separation, y_impl_separation, temp_node.getX(), temp_node.getY()));
                 }
+                temp[i].setCol(temp[i].getLit() === 0 ? 'red' : 'orange');
+                temp[i].setTcol('white');
                 temp[i].setCoords(x_impl_separation, y_impl_separation);
             }
 
