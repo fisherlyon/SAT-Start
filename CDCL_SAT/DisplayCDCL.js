@@ -3,11 +3,14 @@ import { Button } from "../Utility/Button.js";
 import { run } from "./CDCL.js";
 import { ObjectCDCL } from "./ObjectCDCL.js";
 
-let navButtons;
+let navButtons = null;
 let cdcl_example = null;
 
 export function displayCDCL(example) {
-    initNavButtons();
+    if (navButtons === null) {
+        initNavButtons();
+    }
+    
     navButtons.showAll();
 
     if (example === 1) {
@@ -24,11 +27,19 @@ function initNavButtons() {
     navButtons = new ButtonManager();
     let next_btn = new Button(
         "- Next -",
-        width / 2,
-        height * 0.9,
+        width * 0.85,
+        height * 0.9 - 30,
         () => {
-            run(cdcl_example);
+            if (!cdcl_example.getSAT()) {
+                run(cdcl_example);
+            }
         }
     );
-    navButtons.addButtons([next_btn]);
+    let undo_btn = new Button(
+        "- Undo -",
+        width * 0.85,
+        height * 0.9,
+        () => {}
+    );
+    navButtons.addButtons([next_btn, undo_btn]);
 }

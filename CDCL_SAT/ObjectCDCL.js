@@ -124,7 +124,14 @@ export class ObjectCDCL {
     }
 
     updateDecisionTree() {
-        let color = this.#contradiction ? 'red' : 'blue';
+        let color;
+        if (this.#contradiction) {
+            color = 'red';
+        } else if (this.#sat) {
+            color = 'green';
+        } else {
+            color = 'blue';
+        }
         let tcolor = 'white';
 
         // inner recursive function
@@ -171,6 +178,9 @@ export class ObjectCDCL {
     }
 
     numToVar(num) {
+        if (num === 0) {
+            return '{ }';
+        }
         if (num < 0) {
           return "¬" + this.#vars[Math.abs(num) - 1];
         }
@@ -341,6 +351,19 @@ export class ObjectCDCL {
         return getFirst(this.findAllPaths());
     }
 
+    resetD(assertion_level) {
+        if (assertion_level === -1) {
+            this.#D = [];
+        } else {
+            this.#D = this.#D.slice(0, Math.min(this.#D.length, assertion_level + 1));
+        }
+    }
+
+    resetTempKB() {
+        this.#contradiction = false;
+        this.#temp_kb = this.#KB.concat(this.#G);
+    }
+
     getTempKB() { return this.#temp_kb; }
     getD() { return this.#D; }
     getI() { return this.#I; }
@@ -352,5 +375,5 @@ export class ObjectCDCL {
 
     setDecTreeValidity(bool) { this.#valid_tree = bool; }
     setDecTree(tree) { this.#dec_tree = tree; }
-    setImplGraphhValidity(bool) { this.#valid_ig = bool; }
+    setImplGraphValidity(bool) { this.#valid_ig = bool; }
 }
