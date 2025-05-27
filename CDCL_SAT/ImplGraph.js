@@ -78,8 +78,9 @@ export class ImplGraph {
     drawEdges(edges) {
         let flip = 1;
         for (let edge of edges) {
-            edge.draw(flip);
-            flip *= -1;
+            if (edge.draw(flip)) {
+                flip *= -1;
+            };
         }
     }
 

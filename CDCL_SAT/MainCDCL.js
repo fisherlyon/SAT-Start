@@ -37,7 +37,7 @@ function initExampleButtons() {
     exampleButtons = new ButtonManager();
     let btn1 = new Button(
         "Example 1",
-        width / 2,
+        width / 3,
         height / 2,
         () => {
             exampleButtons.remAll();
@@ -45,7 +45,17 @@ function initExampleButtons() {
             example = 1;
         }
     );
-    exampleButtons.addButtons([btn1]);
+    let btn2 = new Button(
+        "Example 2",
+        2 * width / 3,
+        height / 2,
+        () => {
+            exampleButtons.remAll();
+            setScreen(1);
+            example = 2;
+        }
+    );
+    exampleButtons.addButtons([btn1, btn2]);
 }
 
 window.setup = setup;

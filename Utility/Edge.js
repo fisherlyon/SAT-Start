@@ -18,6 +18,7 @@ export class Edge {
     }
 
     draw(flip) {
+        let flip_happens = false;
         push();
         strokeWeight(this.#weight);
         stroke(this.#color);
@@ -33,6 +34,7 @@ export class Edge {
                 this.#x2, this.#y2 + ctrlOffset*flip,
                 this.#x2, this.#y2
             );
+            flip_happens = true;
         } else {
             if (this.#dashed) {
                 drawingContext.setLineDash([4, 4]);
@@ -41,6 +43,7 @@ export class Edge {
         }
 
         pop();
+        return flip_happens;
     }
 
     getX1() { return this.#x1; }

@@ -62,8 +62,6 @@ function runDecisionTree(cdcl_obj) {
             stage_text = "Make New Decision"
             cdcl_obj.addDecision(cdcl_obj.getNextDecision());
             stage = 6;
-        } else if (cdcl_obj.getSAT()) { // if satisfied
-            return;
         } else { // otherwise, invalidate the decision tree and start building the implication graph
             stage_text = "Build Implication Graph"
             cdcl_obj.setDecTreeValidity(false);
@@ -80,8 +78,8 @@ function runDecisionTree(cdcl_obj) {
         stage = 0;
     } 
 
-    cdcl_obj.displayKB(width * 0.05, height * 0.6); // show the current knowledge tree
-    cdcl_obj.displayD(width * 0.55, height * 0.6); // show the decision sequence
+    cdcl_obj.displayKB(width * 0.05, height * 0.6 - 20); // show the current knowledge tree
+    cdcl_obj.displayD(width * 0.55, height * 0.6 - 20); // show the decision sequence
     cdcl_obj.displayDecisionTree(100, 15, PI/10); // show the decision tree
     text("Stage: " + stage_text, width * 0.05, 375);
 }
@@ -150,6 +148,7 @@ function runImplGraph(cdcl_obj) {
             cur_node = null;
             rest_queue = null;
             neighbors = null;
+            temp_d = [];
             updateImplGraph(cdcl_obj.getImplGraph());
             uip = null;
             // get the asserting clauses and assertion level
@@ -173,9 +172,9 @@ function runImplGraph(cdcl_obj) {
         return;
     }
 
-    text("Decision(s)", 35, 250);
-    text("Implication(s)", 115, 250);
-    text("Stage: " + stage_text, 35, 275);
+    text("Decision(s)", 35, 350);
+    text("Implication(s)", 115, 350);
+    text("Stage: " + stage_text, width * 0.05, 375);
 }
 
 function bfs_step() {
@@ -213,14 +212,17 @@ function updateImplGraph(impl_graph) {
 }
 
 function displayBFSState(cdcl_obj) {
-    text("Current Node: " + (cur_node === null ? "None" : cdcl_obj.numToVar(cur_node)), 35, 40);
-    text("Incoming Neighbors: " + (neighbors === null ? "None" : neighbors.map((x) => (cdcl_obj.numToVar(x)))), 35, 55);
-    text("Queue: " + bfs_queue.map((x) => (cdcl_obj.numToVar(x))), 35, 70);
-    text("Nodes Visited: " + Array.from(bfs_visited).map((x) => (cdcl_obj.numToVar(x))), 35, 85);
-    text("Conclict Set: " + Array.from(bfs_result).map((x) => (cdcl_obj.numToVar(x))), 35, 100);
+    let x_coord = 135;
+    let y_coord = 30;
+    let y_incr = 15;
+    text("Current Node: " + (cur_node === null ? "None" : cdcl_obj.numToVar(cur_node)), x_coord, y_coord);
+    text("Incoming Neighbors: " + (neighbors === null ? "None" : neighbors.map((x) => (cdcl_obj.numToVar(x)))), x_coord, y_coord+y_incr*1);
+    text("Queue: " + bfs_queue.map((x) => (cdcl_obj.numToVar(x))), x_coord, y_coord+y_incr*2);
+    text("Nodes Visited: " + Array.from(bfs_visited).map((x) => (cdcl_obj.numToVar(x))), x_coord, y_coord+y_incr*3);
+    text("Conclict Set: " + Array.from(bfs_result).map((x) => (cdcl_obj.numToVar(x))), x_coord, y_coord+y_incr*4);
     if (bfs_queue.length <= 0) {
-        text("Learned Clause: " + "{ " + asserting_clause.map((x) => cdcl_obj.numToVar(x)) + " }", 35, 115);
-        text("Assertion Level: " + assertion_level, 35, 130);
+        text("Learned Clause: " + "{ " + asserting_clause.map((x) => cdcl_obj.numToVar(x)) + " }", x_coord, y_coord+y_incr*5);
+        text("Assertion Level: " + assertion_level, x_coord, y_coord+y_incr*6);
     }
 }
 

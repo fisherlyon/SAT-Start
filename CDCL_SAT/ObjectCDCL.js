@@ -53,18 +53,21 @@ export class ObjectCDCL {
      * @param { (Arrayof Number) } D - Decision Sequence
      * @param { (Arrayof Number) } I - Set of literals either present as unit clauses in KB or derived from unit resuloution
      */
-    unitRes(KB = this.#KB, D = this.#D, G = this.#G, I = this.#I) {
-        let combinedKB = KB.concat(this.numsToClauses(D), G);
-        let unitClause = this.findUnitClause(combinedKB);
+    unitRes() {
+        const ur = (KB, D, G, I) => {
+            let combinedKB = KB.concat(G, this.numsToClauses(D));
+            let unitClause = this.findUnitClause(combinedKB);
 
-        if (unitClause.length === 0) {
-            this.#I = I.reverse();
-            this.#temp_kb = combinedKB;
-            return;
-        } else {
-            I.push(unitClause[0]);
-            return this.unitRes(condition(combinedKB, unitClause[0]), [], [], I);
+            if (unitClause.length === 0) {
+                this.#I = I.reverse();
+                this.#temp_kb = KB;
+                return;
+            } else {
+                return ur(condition(combinedKB, unitClause[0]), [], [], [unitClause[0], ...I]);
+            }
         }
+
+        return ur(this.#KB, this.#D, this.#G, []);
     }
 
     /**
@@ -364,6 +367,7 @@ export class ObjectCDCL {
         this.#temp_kb = this.#KB.concat(this.#G);
     }
 
+    getKB() { return this.#KB; }
     getTempKB() { return this.#temp_kb; }
     getD() { return this.#D; }
     getI() { return this.#I; }
@@ -372,6 +376,7 @@ export class ObjectCDCL {
     getContradiction() { return this.#contradiction; }
     getSAT() { return this.#sat; }
     getImplGraph() { return this.#impl_graph; }
+    getImplGraphValidity() { return this.#valid_ig; }
 
     setDecTreeValidity(bool) { this.#valid_tree = bool; }
     setDecTree(tree) { this.#dec_tree = tree; }
