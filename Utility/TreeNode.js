@@ -41,6 +41,31 @@ export class TreeNode {
         if (this.#right_edge) this.#right_edge.draw();
     }
 
+    clone() {
+        const clone_rec = (node) => {
+            if (!node) return null;
+            const left_clone = clone_rec(node.getLeft());
+            const right_clone = clone_rec(node.getRight());
+
+            const new_node = new TreeNode(node.getLit(), left_clone, right_clone);
+            new_node.setCol(node.getCol());
+            new_node.setTcol(node.getTcol());
+            new_node.setCoords(node.getX(), node.getY());
+
+            if (node.getLeftEdge()) {
+                new_node.setLeftEdge(node.getLeftEdge().clone());
+            }
+            if (node.getRightEdge()) {
+                new_node.setRightEdge(node.getRightEdge().clone());
+            }
+
+            return new_node;
+        };
+
+        return clone_rec(this);
+    }
+
+
     getLit() { return this.#lit; }
     getLeft() { return this.#left; }
     getRight() { return this.#right; }

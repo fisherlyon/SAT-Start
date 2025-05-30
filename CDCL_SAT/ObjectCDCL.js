@@ -14,8 +14,15 @@ import { setDiff } from "../Utility/Util.js"
  * @property { (Arrayof (Arrayof Number)) } G - Set of Learned Clauses
  * @property { (Arrayof (Arrayof Number)) } I - Set of literals either presnet as unit clauses in KB or derived from unit resolution
  * @property { Tree } dec_tree - The current decision tree
+ * @property { Boolean } valid_tree - Boolean to represent the validity of the tree
  * @property { ImplGraph } impl_graph - The current implication graph
+ * @property { Boolean } valid_ig - Boolean to represent the validity of the implication graph
  * @property { (Arrayof String) } vars - Set of variables in knowledge base
+ * @property { Boolean } contradiction - Boolean to represent if a contradiction has occurred
+ * @property { Boolean } sat - Boolean to represent if SAT has occurred
+ * @property { String } stage - String to represent the current stage in running
+ * @property { Boolean } show_bfs - Boolean to represent if BFS text should be displayed
+ * @property { Boolean } has_asserting - Boolean to represent if asserting text should be displayed
  */
 export class ObjectCDCL {
     #KB;
@@ -30,6 +37,9 @@ export class ObjectCDCL {
     #vars;
     #contradiction;
     #sat;
+    #stage;
+    #show_bfs
+    #has_asserting
     
     constructor(KB, vars) {
         this.#KB = KB;
@@ -44,6 +54,9 @@ export class ObjectCDCL {
         this.#vars = vars;
         this.#contradiction = false;
         this.#sat = false;
+        this.#stage = null;
+        this.#show_bfs = false;
+        this.#has_asserting = false;
     }
 
     /**
@@ -126,6 +139,11 @@ export class ObjectCDCL {
         this.#dec_tree.drawTree(node_vars, rad);
     }
 
+    invalidateDecTree() {
+        this.#dec_tree = null;
+        this.#valid_tree = false;
+    }
+
     updateDecisionTree() {
         let color;
         if (this.#contradiction) {
@@ -178,6 +196,10 @@ export class ObjectCDCL {
             decisionText = this.#D.map(lit => this.numToVar(lit)).join(', ');
         }
         text("Current Decision(s): " + decisionText, x, y);
+    }
+
+    displayStage(x, y) {
+        text("Stage: " + this.#stage, x, y);
     }
 
     numToVar(num) {
@@ -367,18 +389,59 @@ export class ObjectCDCL {
         this.#temp_kb = this.#KB.concat(this.#G);
     }
 
+    clone() {
+        const copy = new ObjectCDCL(
+            JSON.parse(JSON.stringify(this.#KB)), 
+            [...this.#vars]
+        );
+
+        // Deep copy remaining fields
+        copy.#temp_kb = JSON.parse(JSON.stringify(this.#temp_kb));
+        copy.#D = [...this.#D];
+        copy.#G = JSON.parse(JSON.stringify(this.#G));
+        copy.#I = [...this.#I];
+
+        // Clone tree if available
+        if (this.#dec_tree) {
+            copy.#dec_tree = this.#dec_tree.clone();
+        }
+        copy.#valid_tree = this.#valid_tree;
+
+        // Clone implication graph if available
+        if (this.#impl_graph) {
+            copy.#impl_graph = this.#impl_graph.clone();
+        }
+        copy.#valid_ig = this.#valid_ig;
+
+        copy.#contradiction = this.#contradiction;
+        copy.#sat = this.#sat;
+        copy.#stage = this.#stage;
+        copy.#show_bfs = this.#show_bfs;
+        copy.#has_asserting = this.#has_asserting;
+
+        return copy;
+    }
+
+
     getKB() { return this.#KB; }
     getTempKB() { return this.#temp_kb; }
     getD() { return this.#D; }
     getI() { return this.#I; }
     getG() { return this.#G; }
     getDecTree() { return this.#dec_tree; }
+    getDecTreeValidity() { return this.#valid_tree; }
     getContradiction() { return this.#contradiction; }
     getSAT() { return this.#sat; }
     getImplGraph() { return this.#impl_graph; }
     getImplGraphValidity() { return this.#valid_ig; }
+    getStage() { return this.#stage; }
+    getShowBFS() { return this.#show_bfs; }
+    getHasAsserting() { return this.#has_asserting; }
 
     setDecTreeValidity(bool) { this.#valid_tree = bool; }
     setDecTree(tree) { this.#dec_tree = tree; }
     setImplGraphValidity(bool) { this.#valid_ig = bool; }
+    setStage(stage) { this.#stage = stage; }
+    setShowBFS(bool) { this.#show_bfs = bool; }
+    setHasAsserting(bool) { this.#has_asserting = bool; }
 }

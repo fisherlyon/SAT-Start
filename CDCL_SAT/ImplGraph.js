@@ -67,6 +67,10 @@ export class ImplGraph {
         this.drawEdges(edges); // draw the edges
         this.drawNodes(dec_nodes, vars, r); // draw the decision nodes
         this.drawNodes(impl_nodes, vars, r); // draw the implication nodes
+        text("Decision(s)", dec_nodes[dec_nodes.length - 1].getX() - 30, dec_nodes[dec_nodes.length -1].getY() + 50);
+        if (impl_nodes.length !== 0) {
+            text("Implication(s)", impl_nodes[0].getX() - 15, impl_nodes[0].getY() + 50);
+        }
     }
 
     drawNodes(nodes, vars, r) {
@@ -76,10 +80,10 @@ export class ImplGraph {
     }
 
     drawEdges(edges) {
-        let flip = 1;
+        let flip = -1;
         for (let edge of edges) {
             if (edge.draw(flip)) {
-                flip *= -1;
+                //flip *= -1;
             };
         }
     }
@@ -121,6 +125,32 @@ export class ImplGraph {
         }
         return [dec_nodes, impl_nodes];
     }
+
+    clone() {
+        const copy = new ImplGraph();
+
+        // Clone nodes
+        const cloned_nodes = new Map();
+        for (const [key, node] of this.#nodes.entries()) {
+            cloned_nodes.set(key, node.clone());
+        }
+        copy.setNodes(cloned_nodes);
+
+        // Clone incoming/outgoing edge maps (array of numbers)
+        const clone_map_of_arrays = (map) => {
+            const new_map = new Map();
+            for (const [key, arr] of map.entries()) {
+                new_map.set(key, [...arr]);
+            }
+            return new_map;
+        };
+
+        copy.setIncoming(clone_map_of_arrays(this.#incoming));
+        copy.setOutgoing(clone_map_of_arrays(this.#outgoing));
+
+        return copy;
+    }
+
 
     getNodes() { return this.#nodes; }
     getIncoming() { return this.#incoming; } 

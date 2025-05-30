@@ -40,6 +40,14 @@ export class ImplGraphNode {
         pop();
     }
 
+    clone() {
+        const copy = new ImplGraphNode(this.#lit, this.#declev, this.#cause, this.#depth);
+        copy.setCol(this.#col);
+        copy.setTcol(this.#tcol);
+        copy.setCoords(this.#x, this.#y);
+        return copy;
+    }
+
     getLit() { return this.#lit; }
     getDeclev() { return this.#declev; }
     getCause() { return this.#cause; }

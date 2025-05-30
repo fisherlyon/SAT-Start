@@ -46,6 +46,14 @@ export class Edge {
         return flip_happens;
     }
 
+    clone() {
+        const copy = new Edge(this.#x1, this.#y1, this.#x2, this.#y2);
+        copy.setColor(this.#color);
+        copy.setDashed(this.#dashed);
+        return copy;
+    }
+
+
     getX1() { return this.#x1; }
     getY1() { return this.#y1; }
     getX2() { return this.#x2; }

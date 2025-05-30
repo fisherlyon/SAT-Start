@@ -151,6 +151,15 @@ export class Tree {
             this.setNodeCoords(node.getRight(), lineEndX, lineEndY, dist * 0.7, angle_left - angle_scale, angle_right + angle_scale, radius, angle_scale);
         }
     }
+
+    clone() {
+        const copy = new Tree();
+        if (this.#root) {
+            copy.#root = this.#root.clone();
+        }
+        return copy;
+    }
+
     
     getRoot() {
         return this.#root;

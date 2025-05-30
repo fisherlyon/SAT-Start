@@ -1,16 +1,14 @@
 import { Button } from "../Utility/Button.js"
 import { ButtonManager } from "../Utility/ButtonManager.js";
-import { displayCDCL } from "./DisplayCDCL.js";
+import { displayCDCL, keyPressed } from "./DisplayCDCL.js";
 import { setScreen, getScreen } from "./ScreenManager.js";
 
 let example = 0;
 let exampleButtons;
-let stage;
 
 function setup() {
     createCanvas(400, 400);
     initExampleButtons();
-    stage = 0;
 }
 
 function draw() {
@@ -26,11 +24,6 @@ function draw() {
         noLoop();
         displayCDCL(example);
     }
-}
-
-function keyPressed() {
-    if (keyCode == LEFT_ARROW) stage -= 1;
-    if (keyCode == RIGHT_ARROW) stage += 1;
 }
 
 function initExampleButtons() {
