@@ -5,6 +5,8 @@ import { Tree } from "../Utility/Tree.js"
 import { TreeNode } from "../Utility/TreeNode.js";
 import { Edge } from "../Utility/Edge.js";
 import { setDiff } from "../Utility/Util.js"
+import { ObjectBFS } from "./ObjectBFS.js";
+import { ImplGraphManager } from "./ImplGraphManager.js";
 
 /**
  * CDCL Object Class
@@ -15,14 +17,11 @@ import { setDiff } from "../Utility/Util.js"
  * @property { (Arrayof (Arrayof Number)) } I - Set of literals either presnet as unit clauses in KB or derived from unit resolution
  * @property { Tree } dec_tree - The current decision tree
  * @property { Boolean } valid_tree - Boolean to represent the validity of the tree
- * @property { ImplGraph } impl_graph - The current implication graph
- * @property { Boolean } valid_ig - Boolean to represent the validity of the implication graph
  * @property { (Arrayof String) } vars - Set of variables in knowledge base
  * @property { Boolean } contradiction - Boolean to represent if a contradiction has occurred
  * @property { Boolean } sat - Boolean to represent if SAT has occurred
  * @property { String } stage - String to represent the current stage in running
- * @property { Boolean } show_bfs - Boolean to represent if BFS text should be displayed
- * @property { Boolean } has_asserting - Boolean to represent if asserting text should be displayed
+ * @property { ImplGraphManager } impl_graph_manager - Manages the implication graph and the bfs object
  */
 export class ObjectCDCL {
     #KB;
@@ -32,14 +31,11 @@ export class ObjectCDCL {
     #I;
     #dec_tree;
     #valid_tree;
-    #impl_graph;
-    #valid_ig;
     #vars;
     #contradiction;
     #sat;
     #stage;
-    #show_bfs
-    #has_asserting
+    #impl_graph_manager
     
     constructor(KB, vars) {
         this.#KB = KB;
@@ -49,14 +45,11 @@ export class ObjectCDCL {
         this.#I = [];
         this.#dec_tree = null;
         this.#valid_tree = false;
-        this.#impl_graph = null;
-        this.#valid_ig = false;
         this.#vars = vars;
         this.#contradiction = false;
         this.#sat = false;
         this.#stage = null;
-        this.#show_bfs = false;
-        this.#has_asserting = false;
+        this.#impl_graph_manager = new ImplGraphManager();
     }
 
     /**
@@ -221,162 +214,48 @@ export class ObjectCDCL {
     }
 
     initImplGraph() {
-        if (!this.#valid_ig || this.#impl_graph === null) {
-            this.#impl_graph = new ImplGraph();
-            this.#valid_ig = true;
-        }
+        this.#impl_graph_manager.initImplGraph();
 
         for (let i = 0; i < this.#D.length; i++) {
-            this.#impl_graph.addDecision(this.#D[i], i);
+            this.#impl_graph_manager.addDecision(this.#D[i], i);
         }
+    }
+
+    initImplGraphBFS(start, target) {
+        this.#impl_graph_manager.initBFS(start, target);
     }
 
     displayImplGraph(radius) {
-        if (!this.#valid_ig || this.#impl_graph === null) {
-            this.#impl_graph = new ImplGraph();
-            this.#valid_ig = true;
-        }
+        this.#impl_graph_manager.drawGraph(this.#vars, radius);
+    }
 
-        this.#impl_graph.drawGraph(this.#vars, radius);
+    updateImplGraphNode(target, color, text_color) {
+        this.#impl_graph_manager.updateNodeColor(target, color, text_color);
     }
 
     findImplClause(lit, temp_d) {
-        const fic = (KB, graph, D, I, impl_lit, kb_index) => {
-
-            if (KB.length === 0) {
-                console.log("Error: No implication clause found.\n");
-                return;
-            }
-
-            let [f, ...r] = KB;
-
-            if (lit === 0) {
-                if (f.every((x) => (I.includes(-x)))) {
-                    let nodes_from = (setDiff(f, [impl_lit])).map((x) => (-x));
-                    graph.addImplication(
-                        impl_lit,
-                        Math.max(...(nodes_from.map((key) => ((graph.getNodes().get(key)).getDeclev())))),
-                        kb_index,
-                        1 + Math.max(...(nodes_from.map((key) => ((graph.getNodes().get(key)).getDepth())))),
-                        nodes_from
-                    );
-                    return;
-                } 
-                return fic(r, graph, D, I, impl_lit, 1 + kb_index);
-            }
-
-            if (
-                f.includes(impl_lit) && 
-                f.every((x) => (D.map((y) => (-y)).concat([impl_lit]).includes(x)))
-            ) {
-                let nodes_from = (setDiff(f, [impl_lit])).map((x) => (-x));
-                graph.addImplication(
-                    impl_lit,
-                    Math.max(...(nodes_from.map((key) => ((graph.getNodes().get(key)).getDeclev())))),
-                    kb_index,
-                    1 + Math.max(...(nodes_from.map((key) => ((graph.getNodes().get(key)).getDepth())))),
-                    nodes_from
-                );
-                return;
-            }
-            return fic(r, graph, D, I, impl_lit, 1 + kb_index);
-        };
-
-        return fic(this.#KB.concat(this.#G), this.#impl_graph, this.#D.concat(temp_d), this.#I, lit, 0);
+        return this.#impl_graph_manager.findImplicationClause(
+            lit, 
+            this.#KB.concat(this.#G), 
+            this.#D.concat(temp_d), 
+            this.#I
+        );
     }
 
-    /**
-     * Gets the decision node made at the highest level in the implication graph.
-     * Used to find the first Unique Implication Point (UIP) (highest graph dominator)
-     * @param { ImplGraph } graph - This CDCL object's current implication graph
-     * @param { (Arrayof Numebrs) } keys - The literals of the nodes in the implication graph
-     * @returns { Number } Returns the decision node made at the highest level 
-     */
     getHDLNode() {
-        const hdl = (graph, keys) => {
-            if (keys.length === 0) {
-                console.log("Error: Couldn't find decision node made at the highest level.");
-                return;
-            }
-
-            let [f, ...r] = keys;
-
-            if (
-                graph.getNodes().get(f).getCause() === null &&
-                graph.getNodes().get(f).getDeclev() === graph.getNodes().get(0).getDeclev()
-            ) {
-                return f;
-            } else {
-                return hdl(graph, r);
-            }
-        }
-
-        return hdl(this.#impl_graph, Array.from(this.#impl_graph.getNodes().keys()));
+        return this.#impl_graph_manager.getHighestDecisionLevelNode();
     }
 
-    /**
-     * Finds all possible paths from the decsion node made at the highest decision level to the contracdiction.
-     * @param { (Map Number (Arrayof Number)) } outgoing_adj_list - Outgoing adjacency list for each of the nodes n the implication graph
-     * @param { Number } source - The source node
-     * @param { Number } target - The target node 
-     * @param { (Arrayof (Arrayof Number)) } queue - Queue of paths used in BFS
-     * @param { (Arrayof (Arrayof Number)) } result - The resulting array of all paths
-     * @returns { (Arrayof (Arrayof Number)) } The resulting array of all paths
-     */
     findAllPaths() {
-        const ap = (outgoing_adj_list, source, target) => {
-            const bfs = (queue, result) => {
-                if (queue.length === 0) {
-                    return result;
-                }
-
-                let [path, ...rest_queue] = queue;
-                let node = path[path.length - 1];
-                let neighbors = outgoing_adj_list.get(node) || [];
-
-                if (node === target) {
-                    return bfs(rest_queue, [path, ...result]);
-                } else {
-                    let new_paths = neighbors.map((n) => (path.concat([n])));
-                    return bfs(rest_queue.concat(new_paths), result);
-                }
-            };
-
-            return (bfs([[source]], [])).reverse();
-        };
-
-        return ap(this.#impl_graph.getOutgoing(), this.getHDLNode(), 0);
+        return this.#impl_graph_manager.findAllPaths();
     }
 
-    /**
-     * 
-     * @returns 
-     */
     findFirstUIP() {
-        const getFirst = (all_paths) => {
-            const findUIPs = (first_path) => {
-                if (first_path.length === 1 && first_path[0] === 0) {
-                    return []; // don't include the contradiction, return
-                }
-
-                let [f, ...r] = first_path;
-                let [, ...rest] = all_paths;
-                
-                if (rest.every((other_path) => (other_path.includes(f)))) {
-                    return [f, ...findUIPs(r)];
-                } else {
-                    return findUIPs(r);
-                }
-            };
-
-            let uips = findUIPs(all_paths[0]);
-            return uips[uips.length - 1];
-        };
-
-        return getFirst(this.findAllPaths());
+        return this.#impl_graph_manager.findFirstUIP();
     }
 
-    resetD(assertion_level) {
+    decisionBackTrack() {
+        const assertion_level = this.#impl_graph_manager.getBFS().getLevel();
         if (assertion_level === -1) {
             this.#D = [];
         } else {
@@ -387,6 +266,18 @@ export class ObjectCDCL {
     resetTempKB() {
         this.#contradiction = false;
         this.#temp_kb = this.#KB.concat(this.#G);
+    }
+
+    addAssertingClause() {
+        this.#G.push(this.#impl_graph_manager.getBFS().getClause());
+    }
+
+    displaySATMessage(x, y) {
+        text("Satisfied with TVA: " + this.#I.map((x) => (this.numToVar(x))), x, y);
+    }
+
+    resetImplGraph() {
+        this.#impl_graph_manager.reset();
     }
 
     clone() {
@@ -401,27 +292,21 @@ export class ObjectCDCL {
         copy.#G = JSON.parse(JSON.stringify(this.#G));
         copy.#I = [...this.#I];
 
-        // Clone tree if available
-        if (this.#dec_tree) {
-            copy.#dec_tree = this.#dec_tree.clone();
-        }
+        if (this.#dec_tree) copy.#dec_tree = this.#dec_tree.clone();
         copy.#valid_tree = this.#valid_tree;
-
-        // Clone implication graph if available
-        if (this.#impl_graph) {
-            copy.#impl_graph = this.#impl_graph.clone();
-        }
-        copy.#valid_ig = this.#valid_ig;
 
         copy.#contradiction = this.#contradiction;
         copy.#sat = this.#sat;
         copy.#stage = this.#stage;
-        copy.#show_bfs = this.#show_bfs;
-        copy.#has_asserting = this.#has_asserting;
+    
+        if (this.#impl_graph_manager) {
+            copy.#impl_graph_manager = this.#impl_graph_manager.clone();
+        } else {
+            copy.#impl_graph_manager = new ImplGraphManager();
+        }
 
         return copy;
     }
-
 
     getKB() { return this.#KB; }
     getTempKB() { return this.#temp_kb; }
@@ -432,16 +317,11 @@ export class ObjectCDCL {
     getDecTreeValidity() { return this.#valid_tree; }
     getContradiction() { return this.#contradiction; }
     getSAT() { return this.#sat; }
-    getImplGraph() { return this.#impl_graph; }
-    getImplGraphValidity() { return this.#valid_ig; }
     getStage() { return this.#stage; }
-    getShowBFS() { return this.#show_bfs; }
-    getHasAsserting() { return this.#has_asserting; }
+    getImplGraph() { return this.#impl_graph_manager.getGraph(); }
+    getImplGraphBFS() { return this.#impl_graph_manager.getBFS(); }
 
     setDecTreeValidity(bool) { this.#valid_tree = bool; }
     setDecTree(tree) { this.#dec_tree = tree; }
-    setImplGraphValidity(bool) { this.#valid_ig = bool; }
     setStage(stage) { this.#stage = stage; }
-    setShowBFS(bool) { this.#show_bfs = bool; }
-    setHasAsserting(bool) { this.#has_asserting = bool; }
 }

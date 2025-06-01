@@ -26,7 +26,7 @@ export class Edge {
 
         const dx = Math.abs(this.#x2 - this.#x1);
         if (this.#y1 === this.#y2 && dx > 65) {
-            const ctrlOffset = 0.4 * dx;
+            const ctrlOffset = 0.3 * dx;
 
             bezier(
                 this.#x1, this.#y1,

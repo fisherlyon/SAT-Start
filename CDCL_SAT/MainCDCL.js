@@ -15,13 +15,11 @@ function draw() {
     background(220);
 
     if (getScreen() == 0) {
+        loop();
         exampleButtons.showAll();
     } else {
-        exampleButtons.remAll();
-    }
-
-    if (getScreen() !== 0 && example !== 0) {
         noLoop();
+        exampleButtons.remAll();
         displayCDCL(example);
     }
 }

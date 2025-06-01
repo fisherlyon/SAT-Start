@@ -129,14 +129,12 @@ export class ImplGraph {
     clone() {
         const copy = new ImplGraph();
 
-        // Clone nodes
         const cloned_nodes = new Map();
         for (const [key, node] of this.#nodes.entries()) {
             cloned_nodes.set(key, node.clone());
         }
         copy.setNodes(cloned_nodes);
 
-        // Clone incoming/outgoing edge maps (array of numbers)
         const clone_map_of_arrays = (map) => {
             const new_map = new Map();
             for (const [key, arr] of map.entries()) {
