@@ -34,6 +34,7 @@ export class ObjectCDCL {
     #vars;
     #contradiction;
     #sat;
+    #unsat;
     #stage;
     #impl_graph_manager
     
@@ -48,6 +49,7 @@ export class ObjectCDCL {
         this.#vars = vars;
         this.#contradiction = false;
         this.#sat = false;
+        this.#unsat = false;
         this.#stage = null;
         this.#impl_graph_manager = new ImplGraphManager();
     }
@@ -213,6 +215,10 @@ export class ObjectCDCL {
         this.#sat = this.#temp_kb.length === 0;
     }
 
+    checkUNSAT() {
+        this.#unsat = this.#D.length === 0;
+    }
+
     initImplGraph() {
         this.#impl_graph_manager.initImplGraph();
 
@@ -297,6 +303,7 @@ export class ObjectCDCL {
 
         copy.#contradiction = this.#contradiction;
         copy.#sat = this.#sat;
+        copy.#unsat = this.#unsat;
         copy.#stage = this.#stage;
     
         if (this.#impl_graph_manager) {
@@ -317,6 +324,7 @@ export class ObjectCDCL {
     getDecTreeValidity() { return this.#valid_tree; }
     getContradiction() { return this.#contradiction; }
     getSAT() { return this.#sat; }
+    getUNSAT() { return this.#unsat; }
     getStage() { return this.#stage; }
     getImplGraph() { return this.#impl_graph_manager.getGraph(); }
     getImplGraphBFS() { return this.#impl_graph_manager.getBFS(); }

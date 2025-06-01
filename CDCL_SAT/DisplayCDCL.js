@@ -7,7 +7,7 @@ import { getScreen, setScreen } from "./ScreenManager.js";
 let navButtons = null;
 let cdcl_example = null;
 
-export function displayCDCL(example) {
+export function displayCDCL(example, customs = []) {
     if (navButtons === null) {
         initNavButtons();
     }
@@ -36,6 +36,12 @@ export function displayCDCL(example) {
                 ],
                 ["A", "B", "C", "X", "Y", "Z"]
             );
+            reinit();
+            run(cdcl_example);
+        }
+    } else if (example === 3) {
+        if (!cdcl_example) {
+            cdcl_example = new ObjectCDCL(customs[0], customs[1]);
             reinit();
             run(cdcl_example);
         }

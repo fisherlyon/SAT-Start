@@ -19,7 +19,7 @@ let last_ig_indices = new Array(); // array of final state IG indices
  * @param {*} cdcl_obj 
  */
 export function run(cdcl_obj) {
-    if ((cdcl_hist_index > -1 && cdcl_hist[cdcl_hist_index].getSAT())) return
+    if ((cdcl_hist_index > -1 && (cdcl_hist[cdcl_hist_index].getSAT() || cdcl_hist[cdcl_hist_index].getUNSAT()))) return;
 
     redraw();
     cdcl_hist_index += 1;
@@ -89,8 +89,13 @@ function runDecisionTree(cdcl_obj) {
                 cdcl_obj.setStage("Make New Decision");
                 stage = 5;
             } else {
-                cdcl_obj.setStage("Build Implication Graph");
-                stage = 5;
+                cdcl_obj.checkUNSAT();
+                if (cdcl_obj.getUNSAT()) {
+                    cdcl_obj.setStage("Formula is Unsatisfiable");
+                } else {
+                    cdcl_obj.setStage("Build Implication Graph");
+                    stage = 5;
+                }
             }
         } else if (stage === 5) { // make a new decision
             if (!cdcl_obj.getContradiction()) {
