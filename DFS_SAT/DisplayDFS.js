@@ -1,79 +1,84 @@
-import { dfs, run, undo } from './DFS.js';
+import { run, undo, initDFS, reinitDFS } from './DFS.js';
 import { legendManager } from './LegendManager.js';
-import { setScreen } from './ScreenManager.js';
+import { getScreen, setScreen } from './ScreenManager.js';
 import { Button } from '../Utility/Button.js';
 import { ButtonManager } from '../Utility/ButtonManager.js';
+import { ObjectDFS } from './ObjectDFS.js'
 
-let displayLegend = false; // read-only
-let navButtons;
+let nav_btns = null;
+let display_legend = false; // read-only
+let dfs_example = null;
 
 export function displayDFS(example) {
-    initNavButtons();
-    navButtons.showAll();
-
-    if (example === 1) {
-        dfs(["A", "B", " "],
-            [
-                [-1, 2],
-                [-1, -2]
-            ],
-            15,
-            PI/10,
-            100
-        )
-    } else if (example === 2) {
-        dfs(["A", "B", "C", " "],
-            [
-                [-1, 2],
-                [-2, 3],
-                [-1, -2]
-            ],
-            15,
-            PI/10,
-            100
-        );
-    } else if (example === 3) {
-        dfs(["A", "B", "C", "D", " "],
-            [
-                [-1, -2, 3, 4],
-                [1, 2],
-                [-3, -4],
-                [2, 3],
-                [-1, -4],
-                [-1, -3],
-                [2, -4],
-                [-1, 2, 3, 4]
-            ],
-            7,
-            PI/11.27,
-            100
-        );
+    if (nav_btns === null) {
+        initNavBtns();
     }
 
-    if (displayLegend) {
+    nav_btns.showAll();
+
+    if (!dfs_example) {
+        if (example === 1) {
+            dfs_example = new ObjectDFS(
+                [[-1, 2], [-1, -2]],
+                ["A", "B", " "],
+                15,
+                PI/10,
+                100
+            );
+        } else if (example === 2) {
+            dfs_example = new ObjectDFS(
+                [[-1, 2], [-2, 3], [-1, -2]],
+                ["A", "B", "C", " "],
+                15,
+                PI/10,
+                100
+            );
+        } else if (example === 3) {
+            dfs_example = new ObjectDFS(
+                [[-1, -2, 3, 4], [1, 2], [-3, -4], [2, 3], [-1, -4], [-1, -3], [2, -4], [-1, 2, 3, 4]],
+                ["A", "B", "C", "D", " "],
+                7,
+                PI/11.27,
+                100
+            );
+        }
+        reinitDFS();
+        initDFS(dfs_example);
+    }
+
+    if (display_legend) {
         legendManager.draw();
     }
 }
 
+export function keyPressed() {
+    let screen = getScreen();
+    if (screen === 1) {
+        if (keyCode === LEFT_ARROW) undo();
+        if (keyCode === RIGHT_ARROW) run(dfs_example);
+    }
+}
+
 export function getDisplayLegend() {
-    return displayLegend;
+    return display_legend;
 }
 
 export function setDisplayLegend(value) {
-    displayLegend = value;
+    display_legend = value;
 }
 
-function initNavButtons() {
-    navButtons = new ButtonManager();
+function initNavBtns() {
+    nav_btns = new ButtonManager();
     let back_btn = new Button(
         '- Back -',
         width * 0.09,
         height * 0.05,
         () => {
-            if (navButtons.getVisible()) {
-                navButtons.remAll();
-            }
+            if (nav_btns.getVisible()) nav_btns.remAll();
+            dfs_example = null;
+            nav_btns = null;
             setScreen(0);
+            if (display_legend) legendManager.close();
             redraw();
         }
     );
@@ -81,21 +86,21 @@ function initNavButtons() {
         '- Legend -',
         width * 0.89,
         height * 0.05,
-        () => {
-            legendManager.open();
-        }
+        () => { legendManager.open(); }
     );
     let next_btn = new Button(
-        '- Next -',
-        5 * width / 7,
-        height * 0.95,
-        run
+        "- Next -",
+        width * 0.85,
+        height * 0.9 - 30,
+        () => { run(dfs_example); }
     );
     let undo_btn = new Button(
-        '- Undo -',
-        width * 0.9,
-        height * 0.95,
-        undo
+        "- Undo -",
+        width * 0.85,
+        height * 0.9,
+        () => {
+            undo(dfs_example);
+        }
     );
-    navButtons.addButtons([back_btn, legend_btn, next_btn, undo_btn]);
+    nav_btns.addButtons([back_btn, legend_btn, next_btn, undo_btn]);
 }

@@ -20,6 +20,7 @@ import { ImplGraphManager } from "./ImplGraphManager.js";
  * @property { (Arrayof String) } vars - Set of variables in knowledge base
  * @property { Boolean } contradiction - Boolean to represent if a contradiction has occurred
  * @property { Boolean } sat - Boolean to represent if SAT has occurred
+ * @property { Boolean } unsat - Boolean to represent if UNSAT has occurred
  * @property { String } stage - String to represent the current stage in running
  * @property { ImplGraphManager } impl_graph_manager - Manages the implication graph and the bfs object
  */

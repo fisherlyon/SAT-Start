@@ -6,7 +6,7 @@ import { Textbox } from "../Utility/Textbox.js";
 import { TextboxManager } from "../Utility/TextboxManager.js";
 
 let example = 0;
-let exampleButtons;
+let nav_btns;
 let textboxes;
 let customs = [[[]], []];
 let invalid_formula = false;
@@ -14,7 +14,7 @@ let invalid_vars = false;
 
 function setup() {
     createCanvas(400, 400);
-    initExampleButtons();
+    initNavBtns();
     initTextboxes();
 }
 
@@ -23,11 +23,11 @@ function draw() {
 
     if (getScreen() == 0) {
         if (!isLooping()) loop();
-        exampleButtons.showAll();
+        nav_btns.showAll();
         textboxes.showAll();
     } else {
         noLoop();
-        exampleButtons.remAll();
+        nav_btns.remAll();
         textboxes.remAll();
         displayCDCL(example, [customs[0], customs[1]]);
     }
@@ -45,14 +45,14 @@ function draw() {
     }
 }
 
-function initExampleButtons() {
-    exampleButtons = new ButtonManager();
+function initNavBtns() {
+    nav_btns = new ButtonManager();
     let btn1 = new Button(
         "Example 1",
         width / 3,
         height / 2,
         () => {
-            exampleButtons.remAll();
+            nav_btns.remAll();
             setScreen(1);
             example = 1;
         }
@@ -62,7 +62,7 @@ function initExampleButtons() {
         2 * width / 3,
         height / 2,
         () => {
-            exampleButtons.remAll();
+            nav_btns.remAll();
             setScreen(1);
             example = 2;
         }
@@ -73,13 +73,13 @@ function initExampleButtons() {
         2 * height / 3 + 80,
         () => {
             if (!(invalid_formula || invalid_vars)) {
-                exampleButtons.remAll();
+                nav_btns.remAll();
                 setScreen(1);
                 example = 3;
             }
         }
     )
-    exampleButtons.addButtons([btn1, btn2, btn3]);
+    nav_btns.addButtons([btn1, btn2, btn3]);
 }
 
 function initTextboxes() {
