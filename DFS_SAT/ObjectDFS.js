@@ -61,7 +61,6 @@ export class ObjectDFS {
      * @returns {void}
      */
     processingUpdate() {
-        this.#stage = "Make New Decision"
         this.#cur_decision = this.#dec_stack.shift();
         while (Math.abs(this.#cur_decision) !== this.#cur_node.getLit()) {
             this.updateNodeColors(this.#cur_node, this.#cur_decision, 'red', 'white', 'red');
@@ -79,7 +78,6 @@ export class ObjectDFS {
      * @returns {void}
      */
     conditionUpdate() {
-        this.#stage = "Condition Formula"
         this.#kb_state_stack.unshift(this.#KB);
         this.#KB = condition(this.#KB, this.#cur_decision);
         this.render();
@@ -93,23 +91,24 @@ export class ObjectDFS {
      * @returns {void}
      */
     stepUpdate() {
-        this.#stage = "DFS Step";
-        if (this.#KB.length === 0) {
+        if (this.checkSAT()) {
             this.updateRest(this.#cur_node, this.#cur_decision, 'green', 'white', 'green');
             this.#sat = 1;
-            this.#stage = "Formula Satisfied"
+            this.#stage += " - Formula Satisfied"
             this.render();
-        } else if (this.#KB.length === 1 && this.#KB[0].length === 0) {
+        } else if (this.checkContradiction()) {
+            this.#stage += " - ❌Invalid Decision";
             this.updateNodeColors(this.#cur_node, this.#cur_decision, 'red', 'white', 'red');
             this.#path.pop();
             this.render();
             this.#KB = this.#kb_state_stack.shift();
             if (this.#dec_stack.length === 0) {
                 this.#sat = 0;
-                this.#stage = "Formula is Unsatisfiable";
+                this.#stage += " - Formula is Unsatisfiable";
                 this.render();
             }
         } else {
+            this.#stage += " - ✅Proceed";
             this.updateNodeColors(this.#cur_node, this.#cur_decision, 'green', 'white', 'green');
             this.#cur_node = this.step(this.#cur_decision);
             this.#dec_stack.unshift(-this.#cur_node.getLit());
@@ -176,8 +175,11 @@ export class ObjectDFS {
     }
 
     displayFormula() {
-        let form_text = `{${this.#KB.map(clause => `{${clause.map((x) => (this.numToVar(x))).join(' v ')}}`).join(' ∧\n')}}`;
-        text("Formula:\n" + form_text, width / 20, 3 * height / 5);
+        let formula_text = `{${this.#KB.map(clause => `{${clause.map((x) => (this.numToVar(x))).join(' v ')}}`).join(' ∧\n')}}`;
+        formula_text = formula_text + ((this.#sat === 0) ? " => UNSATISFIABLE" : "");
+        formula_text = formula_text + ((this.#sat === 1) ? " => SATISFIED" : "");
+        formula_text = formula_text + (this.checkContradiction() ? " => CONTRADICTION" : "");
+        text("Formula:\n" + formula_text, width / 20, 3 * height / 5);
     }
 
     displayPath() {
@@ -189,7 +191,15 @@ export class ObjectDFS {
         text("Stage: " + this.#stage, width * 0.05, 375);
     }
 
-    clone() {
+    checkContradiction() {
+        return this.#KB.length === 1 && this.#KB[0].length === 0;
+    }
+
+    checkSAT() {
+        return this.#KB.length === 0;
+    }
+
+    clone() { 
         const copy = new ObjectDFS(
             JSON.parse(JSON.stringify(this.#KB)),
             [...this.#vars],
@@ -212,5 +222,7 @@ export class ObjectDFS {
 
     getSAT() { return this.#sat === 1; }
     getUNSAT() { return this.#sat === 0; }
+    getCurDecision() { return this.#cur_decision; }
+
     setStage(stage) { this.#stage = stage; }
 }

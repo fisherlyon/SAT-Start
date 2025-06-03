@@ -1,6 +1,6 @@
 let stage = 0;
-let dfs_hist = new Array();
-let dfs_hist_index = -1;
+export let dfs_hist = new Array();
+export let dfs_hist_index = -1;
 
 /**
  * Initializes the DFS Object for running DFS
@@ -26,12 +26,24 @@ export function run(dfs_obj) {
         temp.render();
     } else {
         if (stage === 0) {
-            dfs_obj.processingUpdate();
+            dfs_obj.setStage("Make New Decision");
+            dfs_obj.render();
             stage = 1;
         } else if (stage === 1) {
-            dfs_obj.conditionUpdate();
+            dfs_obj.processingUpdate();
             stage = 2;
         } else if (stage === 2) {
+            dfs_obj.setStage("Condition Formula on " + dfs_obj.numToVar(dfs_obj.getCurDecision()));
+            dfs_obj.render();
+            stage = 3
+        } else if (stage === 3) {
+            dfs_obj.conditionUpdate();
+            stage = 4;
+        } else if (stage === 4) {
+            dfs_obj.setStage("Check Status");
+            dfs_obj.render();
+            stage = 5;
+        } else if (stage === 5) {
             dfs_obj.stepUpdate();
             stage = 0;
         }

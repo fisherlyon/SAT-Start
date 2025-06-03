@@ -48,6 +48,7 @@ export function displayDFS(example) {
 
     if (display_legend) {
         legendManager.draw();
+        nav_btns.remAll();
     }
 }
 
@@ -78,7 +79,6 @@ function initNavBtns() {
             dfs_example = null;
             nav_btns = null;
             setScreen(0);
-            if (display_legend) legendManager.close();
             redraw();
         }
     );

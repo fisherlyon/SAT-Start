@@ -1,4 +1,5 @@
 import { setDisplayLegend } from "./DisplayDFS.js";
+import { dfs_hist, dfs_hist_index } from "./DFS.js";
 
 class LegendManager {
     constructor() {
@@ -26,6 +27,7 @@ class LegendManager {
         }
         setDisplayLegend(false);
         redraw();
+        dfs_hist[dfs_hist_index].render();
     }
 
     draw() {
