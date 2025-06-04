@@ -67,7 +67,7 @@ export class ImplGraph {
         this.drawEdges(edges); // draw the edges
         this.drawNodes(dec_nodes, vars, r); // draw the decision nodes
         this.drawNodes(impl_nodes, vars, r); // draw the implication nodes
-        text("Decision(s)", dec_nodes[dec_nodes.length - 1].getX() - 30, dec_nodes[dec_nodes.length -1].getY() + 50);
+        text("Decision(s)", dec_nodes[dec_nodes.length - 1].getX() - 30, dec_nodes[dec_nodes.length - 1].getY() + 50);
         if (impl_nodes.length !== 0) {
             text("Implication(s)", impl_nodes[0].getX() - 15, impl_nodes[0].getY() + 50);
         }

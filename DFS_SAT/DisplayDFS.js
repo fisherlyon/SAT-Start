@@ -70,9 +70,9 @@ export function setDisplayLegend(value) {
 
 function initNavBtns() {
     nav_btns = new ButtonManager();
-    let back_btn = new Button(
-        '- Back -',
-        width * 0.09,
+    let home_btn = new Button(
+        '- Home -',
+        width * 0.1,
         height * 0.05,
         () => {
             if (nav_btns.getVisible()) nav_btns.remAll();
@@ -102,5 +102,5 @@ function initNavBtns() {
             undo(dfs_example);
         }
     );
-    nav_btns.addButtons([back_btn, legend_btn, next_btn, undo_btn]);
+    nav_btns.addButtons([home_btn, legend_btn, next_btn, undo_btn]);
 }

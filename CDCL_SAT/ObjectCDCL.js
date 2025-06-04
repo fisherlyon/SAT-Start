@@ -179,7 +179,7 @@ export class ObjectCDCL {
 
     displayKB(x, y) {
         let formula_text = `{${this.#temp_kb.map(clause => `{${clause.map(lit => this.numToVar(lit)).join(' v ')}}`).join(' ∧\n')}}`;
-        formula_text = formula_text + (this.#contradiction ? " => CONDRADICTION\nLet's build the implication graph..." : "");
+        formula_text = formula_text + (this.#contradiction ? " => CONTRADICTION\nLet's build the implication graph..." : "");
         formula_text = formula_text + (this.#sat ? " => SATISFIED" : "");
         text("Formula:\n" + formula_text, x, y);
     }
@@ -203,9 +203,9 @@ export class ObjectCDCL {
             return '{ }';
         }
         if (num < 0) {
-          return "¬" + this.#vars[Math.abs(num) - 1];
+          return "¬" + (this.#vars[Math.abs(num) - 1] ?? "?");
         }
-        return this.#vars[num - 1];
+        return this.#vars[num - 1] ?? "?";
     }
 
     checkContradiction() {

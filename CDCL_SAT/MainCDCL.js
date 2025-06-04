@@ -105,14 +105,14 @@ function collectCustoms() {
 
         try{
             formula_arr = JSON.parse(tbs[0].getValue());
-            invalid_formula = false;
+            invalid_formula = !validateFormula(formula_arr);
         } catch (e) {
             invalid_formula = true;
         }
 
         try{
             vars_arr = JSON.parse(tbs[1].getValue());
-            invalid_vars = false;
+            invalid_vars = !validateVars(vars_arr);
         } catch (e) {
             invalid_vars = true;
         }
@@ -121,6 +121,19 @@ function collectCustoms() {
 
         customs = [formula_arr, vars_arr];
     }
+}
+
+function validateFormula(input) {
+    return Array.isArray(input) &&
+        input.every(arr =>
+            Array.isArray(arr) &&
+            arr.every(Number.isInteger)
+        );
+}
+
+function validateVars(input) {
+    if (!Array.isArray(input)) return false;
+    return input.every((x) => ((typeof x) === "string"));
 }
 
 function redBox(x, y, w, h) {

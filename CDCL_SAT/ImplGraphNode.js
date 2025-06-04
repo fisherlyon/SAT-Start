@@ -36,6 +36,7 @@ export class ImplGraphNode {
         ellipse(this.#x, this.#y, r * 2, r * 2);
         fill(this.#tcol);
         let node_text = this.#lit === 0 ? '{ }' : vars[Math.abs(this.#lit) - 1];
+        if (node_text == null) node_text = "?";
         text(node_text, this.#x - node_text.length * (node_text === '{ }' ? 2 : 4), this.#y + 4);
         pop();
     }
