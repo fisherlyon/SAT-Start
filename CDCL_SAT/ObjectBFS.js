@@ -65,13 +65,17 @@ export class ObjectBFS {
     }
 
     getAssertionLevel() {
-        let declevs = this.#clause.map((x) => (this.#impl_graph.getNodes().get(-x).getDeclev()));
-        if (declevs.length === 1) {
+        let declevs = this.#clause.map(
+            (x) => this.#impl_graph.getNodes().get(-x).getDeclev()
+        );
+
+        if (declevs.length <= 1) {
             return -1;
         }
-
-        return Math.min(...declevs);
+        declevs.sort((a, b) => b - a);
+        return declevs[1]; // return the second highest
     }
+
 
     display(cdcl_obj, x, y, y_incr) {
         text("Current Node: " + (this.#current === null ? "None" : cdcl_obj.numToVar(this.#current)), x, y);

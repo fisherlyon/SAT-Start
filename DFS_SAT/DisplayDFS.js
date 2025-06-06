@@ -27,7 +27,7 @@ export function displayDFS(example) {
             );
         } else if (example === 2) {
             dfs_example = new ObjectDFS(
-                [[-1, 2], [-2, 3], [-1, -2]],
+                [[1, 3], [-1, 2], [-1, -2]],
                 ["A", "B", "C", " "],
                 15,
                 PI/10,

@@ -29,6 +29,8 @@ function draw() {
         noLoop();
         nav_btns.remAll();
         textboxes.remAll();
+        invalid_formula = false;
+        invalid_vars = false;
         displayCDCL(example, [customs[0], customs[1]]);
     }
 
